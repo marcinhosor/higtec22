@@ -27,38 +27,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [companyId, setCompanyId] = useState<string | null>(null);
 
   useEffect(() => {
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          const { data } = await supabase
-            .from("profiles")
-            .select("company_id")
-            .eq("user_id", session.user.id)
-            .maybeSingle();
-          setCompanyId(data?.company_id ?? null);
+          // Use setTimeout to avoid Supabase auth deadlock
+          setTimeout(async () => {
+            const { data } = await supabase
+              .from("profiles")
+              .select("company_id")
+              .eq("user_id", session.user.id)
+              .maybeSingle();
+            setCompanyId(data?.company_id ?? null);
+            setLoading(false);
+          }, 0);
         } else {
           setCompanyId(null);
+          setLoading(false);
         }
-
-        setLoading(false);
       }
     );
 
+    // Then get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      if (session?.user) {
-        supabase
-          .from("profiles")
-          .select("company_id")
-          .eq("user_id", session.user.id)
-          .maybeSingle()
-          .then(({ data }) => setCompanyId(data?.company_id ?? null));
+      if (!session) {
+        setSession(null);
+        setUser(null);
+        setCompanyId(null);
+        setLoading(false);
       }
-      setLoading(false);
+      // If session exists, onAuthStateChange will handle it
     });
 
     return () => subscription.unsubscribe();
