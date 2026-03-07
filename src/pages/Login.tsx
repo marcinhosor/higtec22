@@ -75,7 +75,7 @@ const Login = () => {
           </div>
 
           <div className="text-right">
-            <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition">
+            <Link to="/esqueci-senha" className="text-sm text-blue-400 hover:text-blue-300 transition">
               Esqueceu a senha?
             </Link>
           </div>
@@ -97,7 +97,7 @@ const Login = () => {
 
           <p className="text-center text-sm text-slate-400">
             Não tem conta?{" "}
-            <Link to="/signup" className="text-blue-400 hover:text-blue-300 font-medium transition">
+            <Link to="/cadastro" className="text-blue-400 hover:text-blue-300 font-medium transition">
               Criar conta
             </Link>
           </p>

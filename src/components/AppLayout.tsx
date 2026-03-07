@@ -3,7 +3,8 @@ import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Calendar, Users, FileText, Settings, LogOut, Menu, X,
-  LayoutDashboard, Package, Wrench, FlaskConical
+  LayoutDashboard, FlaskConical, Wrench, BarChart3,
+  Play, TrendingUp, Store, MapPin, Calculator
 } from "lucide-react";
 
 const navItems = [
@@ -11,8 +12,14 @@ const navItems = [
   { to: "/agenda", icon: Calendar, label: "Agenda" },
   { to: "/clientes", icon: Users, label: "Clientes" },
   { to: "/orcamentos", icon: FileText, label: "Orçamentos" },
+  { to: "/execucao", icon: Play, label: "Execução" },
   { to: "/produtos", icon: FlaskConical, label: "Produtos" },
+  { to: "/calculadora", icon: Calculator, label: "Calculadora" },
   { to: "/equipamentos", icon: Wrench, label: "Equipamentos" },
+  { to: "/relatorios", icon: BarChart3, label: "Relatórios" },
+  { to: "/painel", icon: TrendingUp, label: "Painel Estratégico" },
+  { to: "/deslocamentos", icon: MapPin, label: "Deslocamentos" },
+  { to: "/marketplace", icon: Store, label: "Marketplace" },
   { to: "/configuracoes", icon: Settings, label: "Configurações" },
 ];
 
@@ -25,28 +32,21 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen bg-slate-50 flex">
       {/* Overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-30 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 bg-black/40 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* Sidebar */}
-      <aside
-        className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white transform transition-transform lg:translate-x-0 ${
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
+      <aside className={`fixed lg:static inset-y-0 left-0 z-40 w-64 bg-slate-900 text-white transform transition-transform lg:translate-x-0 flex flex-col ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         <div className="flex items-center justify-between p-5 border-b border-slate-700">
-          <h1 className="text-2xl font-black tracking-tight">
+          <Link to="/" className="text-2xl font-black tracking-tight">
             Hig<span className="text-blue-400">Tec</span>
-          </h1>
+          </Link>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
             <X size={20} />
           </button>
         </div>
 
-        <nav className="p-3 space-y-1 flex-1">
+        <nav className="p-3 space-y-0.5 flex-1 overflow-y-auto">
           {navItems.map(({ to, icon: Icon, label }) => {
             const active = location.pathname === to;
             return (
@@ -55,9 +55,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                 to={to}
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition ${
-                  active
-                    ? "bg-blue-600 text-white"
-                    : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  active ? "bg-blue-600 text-white" : "text-slate-300 hover:bg-slate-800 hover:text-white"
                 }`}
               >
                 <Icon size={18} />
@@ -69,10 +67,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
         <div className="p-4 border-t border-slate-700">
           <p className="text-xs text-slate-500 truncate mb-2">{user?.email}</p>
-          <button
-            onClick={signOut}
-            className="flex items-center gap-2 text-sm text-slate-400 hover:text-red-400 transition w-full"
-          >
+          <button onClick={signOut} className="flex items-center gap-2 text-sm text-slate-400 hover:text-red-400 transition w-full">
             <LogOut size={16} /> Sair
           </button>
         </div>
