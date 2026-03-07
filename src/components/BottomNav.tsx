@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, Calendar, Users, FileText, Settings } from "lucide-react";
+import { Users, Calendar, Calculator, FlaskConical, Settings } from "lucide-react";
 
 const items = [
-  { to: "/", icon: LayoutDashboard, label: "Início" },
-  { to: "/agenda", icon: Calendar, label: "Agenda" },
   { to: "/clientes", icon: Users, label: "Clientes" },
-  { to: "/orcamentos", icon: FileText, label: "Orçamentos" },
+  { to: "/agenda", icon: Calendar, label: "Agenda" },
+  { to: "/calculadora", icon: Calculator, label: "Cálculo" },
+  { to: "/produtos", icon: FlaskConical, label: "Produtos" },
   { to: "/configuracoes", icon: Settings, label: "Config" },
 ];
 
