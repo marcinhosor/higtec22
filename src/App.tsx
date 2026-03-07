@@ -10,6 +10,7 @@ import ForgotPassword from "@/pages/ForgotPassword";
 import ResetPassword from "@/pages/ResetPassword";
 import Dashboard from "@/pages/Dashboard";
 import Agenda from "@/pages/Agenda";
+import Clientes from "@/pages/Clientes";
 
 const queryClient = new QueryClient();
 
@@ -31,6 +32,7 @@ const App = () => (
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
           <Route path="/agenda" element={<ProtectedPage><Agenda /></ProtectedPage>} />
+          <Route path="/clientes" element={<ProtectedPage><Clientes /></ProtectedPage>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
