@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import BottomNav from "@/components/BottomNav";
 import {
   Calendar, Users, FileText, Settings, LogOut, Menu, X,
   LayoutDashboard, FlaskConical, Wrench, BarChart3,
