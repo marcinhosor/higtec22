@@ -123,7 +123,7 @@ const Agenda = () => {
       {/* Date navigator */}
       <div className="flex items-center gap-3 mb-5 bg-white rounded-xl border border-slate-200 p-3">
         <button onClick={() => setSelectedDate(subDays(selectedDate, 1))} className="p-2 hover:bg-slate-100 rounded-lg"><ChevronLeft size={18} /></button>
-        <button onClick={() => setSelectedDate(new Date())} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${isToday(selectedDate) ? "bg-blue-600 text-white" : "hover:bg-slate-100 text-slate-600"}`}>Hoje</button>
+        <button onClick={() => setSelectedDate(new Date())} className={`px-4 py-1.5 rounded-lg text-sm font-medium transition ${isToday(selectedDate) ? "bg-gradient-to-r from-sky-400 to-sky-500 text-white shadow-sm" : "hover:bg-slate-100 text-slate-600"}`}>Hoje</button>
         <span className="flex-1 text-center font-medium text-slate-800 capitalize text-sm">{format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}</span>
         <button onClick={() => setSelectedDate(addDays(selectedDate, 1))} className="p-2 hover:bg-slate-100 rounded-lg"><ChevronRight size={18} /></button>
       </div>
