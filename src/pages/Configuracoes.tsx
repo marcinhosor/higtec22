@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useCompanyPlan, PLAN_FEATURES } from "@/hooks/useCompanyPlan";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Save, Palette, CreditCard, Check, Crown, Building2, Sliders, LogOut } from "lucide-react";
+import { Save, Palette, Check, Crown, Building2, LogOut, Zap, Star, ChevronRight, Settings2, Shield } from "lucide-react";
 import PlanBadge from "@/components/PlanBadge";
 import { Link } from "react-router-dom";
 
@@ -15,6 +15,36 @@ const THEMES = [
   { id: "emerald", name: "Emerald Executive", emoji: "🟢", colors: ["#064e3b", "#059669", "#10b981", "#ecfdf5"], tier: "premium" as const },
   { id: "titanium", name: "Titanium Dark", emoji: "🔥", colors: ["#1e293b", "#475569", "#64748b", "#0f172a"], tier: "premium" as const },
 ];
+
+const SectionCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
+  <div className={`bg-white rounded-2xl border border-slate-100 shadow-sm ${className}`}>
+    {children}
+  </div>
+);
+
+const SectionHeader = ({ icon: Icon, title, subtitle }: { icon: typeof Building2; title: string; subtitle: string }) => (
+  <div className="flex items-center gap-3 mb-5">
+    <div className="w-11 h-11 rounded-xl bg-sky-50 flex items-center justify-center flex-shrink-0">
+      <Icon size={20} className="text-sky-500" />
+    </div>
+    <div>
+      <h3 className="text-base font-bold text-slate-800">{title}</h3>
+      <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+    </div>
+  </div>
+);
+
+const InputField = ({ label, value, onChange, placeholder }: { label: string; value: string; onChange: (v: string) => void; placeholder?: string }) => (
+  <div>
+    <label className="block text-sm font-medium text-slate-600 mb-1.5">{label}</label>
+    <input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-800 bg-slate-50/50 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-transparent transition placeholder:text-slate-300"
+    />
+  </div>
+);
 
 const Configuracoes = () => {
   const { companyId, signOut } = useAuth();
@@ -54,47 +84,97 @@ const Configuracoes = () => {
     return planTier === "premium";
   };
 
-  if (loading) return <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>;
+  const planIcons = { free: Star, pro: Zap, premium: Crown };
+  const planColors = { free: "bg-slate-100 text-slate-600", pro: "bg-sky-100 text-sky-700", premium: "bg-amber-100 text-amber-700" };
+  const currentPlan = PLAN_FEATURES[planTier];
+  const PlanIcon = planIcons[planTier];
+
+  if (loading) return (
+    <div className="flex justify-center items-center py-20">
+      <div className="animate-spin rounded-full h-8 w-8 border-2 border-sky-500 border-t-transparent" />
+    </div>
+  );
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-xl font-bold text-slate-800">Configurações</h2>
-        <button onClick={signOut} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-red-500 transition">
+    <div className="space-y-4 pb-8">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold text-slate-800">Configurações</h1>
+          <p className="text-sm text-slate-400 mt-0.5">Gerencie sua conta e preferências</p>
+        </div>
+        <button
+          onClick={signOut}
+          className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm text-slate-400 hover:text-red-500 hover:bg-red-50 transition"
+        >
           <LogOut size={16} />
+          <span className="hidden sm:inline">Sair</span>
         </button>
       </div>
 
-      {/* Plan section */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm mb-4">
-        <div className="flex items-center gap-3 mb-3">
-          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-            <Crown size={20} className="text-blue-600" />
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-800">Plano da Conta</h3>
-            <p className="text-sm text-slate-400">Gerencie sua assinatura</p>
-          </div>
-        </div>
-        <div className="mb-2">
-          <PlanBadge tier={planTier} size="md" />
-        </div>
-        <p className="text-sm text-slate-500">{PLAN_FEATURES[planTier].features[0]}</p>
-      </div>
-
-      {/* Visual Customization */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm mb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-            <Palette size={20} className="text-blue-600" />
-          </div>
-          <div>
-            <h3 className="font-bold text-slate-800">Personalização Visual</h3>
-            <p className="text-sm text-slate-400">Escolha a paleta de cores do sistema e PDFs</p>
+      {/* 1. Dados da Empresa */}
+      <SectionCard className="p-6">
+        <SectionHeader icon={Building2} title="Dados da Empresa" subtitle="Informações principais do seu negócio" />
+        <div className="space-y-4">
+          <InputField label="Nome da Empresa" value={form.name} onChange={(v) => setForm({ ...form, name: v })} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <InputField label="Telefone" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} placeholder="(00) 00000-0000" />
+            <InputField label="CNPJ (opcional)" value={form.cnpj} onChange={(v) => setForm({ ...form, cnpj: v })} placeholder="00.000.000/0001-00" />
           </div>
         </div>
 
-        <div className="space-y-2.5">
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="mt-5 w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-sm"
+        >
+          <Save size={16} />
+          {saving ? "Salvando..." : "Salvar Alterações"}
+        </button>
+      </SectionCard>
+
+      {/* 2. Plano da Conta */}
+      <SectionCard className="p-6">
+        <SectionHeader icon={Shield} title="Plano da Conta" subtitle="Gerencie sua assinatura e benefícios" />
+
+        <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-sky-50/50 border border-slate-100 mb-4">
+          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${planColors[planTier]}`}>
+            <PlanIcon size={22} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 mb-0.5">
+              <PlanBadge tier={planTier} size="md" />
+            </div>
+            <p className="text-xs text-slate-400">{currentPlan.price} • {currentPlan.features[0]}</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {currentPlan.features.slice(0, 4).map((f) => (
+            <div key={f} className="flex items-start gap-1.5 text-xs text-slate-500 p-2 rounded-lg bg-slate-50">
+              <Check size={12} className="text-sky-500 mt-0.5 flex-shrink-0" />
+              <span>{f}</span>
+            </div>
+          ))}
+        </div>
+
+        <Link
+          to="/checkout"
+          className="flex items-center justify-between w-full p-3.5 rounded-xl border border-sky-100 bg-sky-50/50 hover:bg-sky-50 transition group"
+        >
+          <div className="flex items-center gap-2">
+            <Crown size={16} className="text-sky-500" />
+            <span className="text-sm font-medium text-sky-700">Ver todos os planos</span>
+          </div>
+          <ChevronRight size={16} className="text-sky-400 group-hover:translate-x-0.5 transition-transform" />
+        </Link>
+      </SectionCard>
+
+      {/* 3. Personalização Visual */}
+      <SectionCard className="p-6">
+        <SectionHeader icon={Palette} title="Personalização Visual" subtitle="Escolha a paleta de cores do sistema e PDFs" />
+
+        <div className="space-y-2">
           {THEMES.map((theme) => {
             const available = canUseTheme(theme.tier);
             const isSelected = selectedTheme === theme.id;
@@ -102,18 +182,35 @@ const Configuracoes = () => {
               <button
                 key={theme.id}
                 onClick={() => available && setSelectedTheme(theme.id)}
-                className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 text-left transition ${
-                  isSelected ? "border-blue-500 bg-blue-50/50" : available ? "border-slate-100 hover:border-slate-200" : "border-slate-50 opacity-50 cursor-not-allowed"
+                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
+                  isSelected
+                    ? "border-sky-400 bg-sky-50/60 shadow-sm"
+                    : available
+                      ? "border-slate-100 hover:border-slate-200 hover:bg-slate-50/50"
+                      : "border-slate-50 opacity-40 cursor-not-allowed"
                 }`}
               >
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   {theme.colors.map((c, i) => (
-                    <div key={i} className="w-8 h-8 rounded-full border border-white shadow-sm" style={{ backgroundColor: c }} />
+                    <div
+                      key={i}
+                      className="w-7 h-7 rounded-full border-2 border-white shadow-sm"
+                      style={{ backgroundColor: c }}
+                    />
                   ))}
                 </div>
-                <span className="flex-1 text-sm font-medium text-slate-700">{theme.emoji} {theme.name}</span>
+                <div className="flex-1 min-w-0">
+                  <span className="text-sm font-medium text-slate-700 truncate block">
+                    {theme.emoji && `${theme.emoji} `}{theme.name}
+                  </span>
+                  {!available && (
+                    <span className="text-[10px] text-amber-500 font-medium uppercase tracking-wide">
+                      {theme.tier === "pro" ? "Pro" : "Premium"}
+                    </span>
+                  )}
+                </div>
                 {isSelected && (
-                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-6 h-6 bg-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
                     <Check size={14} className="text-white" />
                   </div>
                 )}
@@ -121,50 +218,49 @@ const Configuracoes = () => {
             );
           })}
         </div>
+      </SectionCard>
 
-        {/* Advanced customization hint */}
-        <div className="mt-4 pt-4 border-t border-slate-100">
-          <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
-            <div className="w-10 h-10 bg-slate-200 rounded-xl flex items-center justify-center">
-              <Sliders size={18} className="text-slate-500" />
-            </div>
+      {/* 4. Configurações do Sistema */}
+      <SectionCard className="p-6">
+        <SectionHeader icon={Settings2} title="Configurações do Sistema" subtitle="Preferências gerais do aplicativo" />
+
+        <div className="space-y-3">
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <div>
-              <p className="text-sm font-medium text-slate-700">🎨 Personalização Avançada</p>
-              <p className="text-xs text-slate-400">Configure cada cor manualmente com HEX</p>
+              <p className="text-sm font-medium text-slate-700">Notificações push</p>
+              <p className="text-xs text-slate-400 mt-0.5">Receba alertas de agenda e estoque</p>
+            </div>
+            <div className="w-10 h-6 bg-sky-400 rounded-full flex items-center justify-end px-0.5 cursor-pointer">
+              <div className="w-5 h-5 bg-white rounded-full shadow-sm" />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div>
+              <p className="text-sm font-medium text-slate-700">Confirmação de exclusão</p>
+              <p className="text-xs text-slate-400 mt-0.5">Pedir confirmação ao excluir registros</p>
+            </div>
+            <div className="w-10 h-6 bg-sky-400 rounded-full flex items-center justify-end px-0.5 cursor-pointer">
+              <div className="w-5 h-5 bg-white rounded-full shadow-sm" />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
+            <div>
+              <p className="text-sm font-medium text-slate-700">Modo compacto</p>
+              <p className="text-xs text-slate-400 mt-0.5">Reduza o espaçamento das listas</p>
+            </div>
+            <div className="w-10 h-6 bg-slate-300 rounded-full flex items-center justify-start px-0.5 cursor-pointer">
+              <div className="w-5 h-5 bg-white rounded-full shadow-sm" />
             </div>
           </div>
         </div>
+      </SectionCard>
+
+      {/* Footer info */}
+      <div className="text-center pt-2 pb-4">
+        <p className="text-xs text-slate-300">HigTec v2.0 • Gestão profissional de higienização</p>
       </div>
-
-      {/* Company data */}
-      <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm mb-4">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
-            <Building2 size={20} className="text-blue-600" />
-          </div>
-          <h3 className="font-bold text-slate-800">Dados da Empresa</h3>
-        </div>
-
-        <div className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Empresa</label>
-            <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-            <input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} placeholder="(00) 00000-0000" className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">CNPJ (opcional)</label>
-            <input value={form.cnpj} onChange={(e) => setForm({ ...form, cnpj: e.target.value })} placeholder="00.000.000/0001-00" className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-        </div>
-      </div>
-
-      {/* Save button */}
-      <button onClick={handleSave} disabled={saving} className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl text-sm font-bold transition disabled:opacity-50 mb-4 shadow-sm">
-        <Save size={16} /> {saving ? "Salvando..." : "Salvar Configurações"}
-      </button>
     </div>
   );
 };
