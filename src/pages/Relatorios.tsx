@@ -71,7 +71,7 @@ const Relatorios = () => {
         {reportTypes.map(({ key, label, icon: Icon }) => (
           <button key={key} onClick={() => setReportType(key)}
             className={`flex flex-col items-center gap-1.5 py-4 rounded-xl text-sm font-medium transition ${
-              reportType === key ? "bg-blue-600 text-white shadow-md" : "bg-white text-slate-500 border border-slate-200"
+              reportType === key ? "bg-gradient-to-r from-sky-400 to-sky-500 text-white shadow-md" : "bg-white text-slate-500 border border-slate-200 hover:border-sky-200"
             }`}>
             <Icon size={20} />
             {label}

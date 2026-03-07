@@ -162,7 +162,7 @@ const Configuracoes = () => {
       </div>
 
       {/* Save button */}
-      <button onClick={handleSave} disabled={saving} className="w-full flex items-center justify-center gap-2 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition disabled:opacity-50 mb-4">
+      <button onClick={handleSave} disabled={saving} className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl text-sm font-bold transition disabled:opacity-50 mb-4 shadow-sm">
         <Save size={16} /> {saving ? "Salvando..." : "Salvar Configurações"}
       </button>
     </div>
