@@ -31,16 +31,16 @@ const Dashboard = () => {
     <div className="pb-4">
       {/* Hero */}
       <div className="bg-gradient-to-r from-sky-500 to-blue-600 rounded-2xl p-5 mb-5 text-white shadow-lg">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col items-center text-center gap-2">
           {logoUrl ? (
-            <img src={logoUrl} alt={companyName} className="w-12 h-12 rounded-xl object-cover border-2 border-white/20" />
+            <img src={logoUrl} alt={companyName} className="w-16 h-16 rounded-xl object-cover border-2 border-white/20" />
           ) : (
-            <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center text-xl font-black backdrop-blur-sm">
+            <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center text-2xl font-black backdrop-blur-sm">
               H
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <h1 className="text-lg font-bold truncate">{companyName}</h1>
+          <div>
+            <h1 className="text-lg font-bold">{companyName}</h1>
             <p className="text-sky-100 text-xs">Bem-vindo de volta!</p>
           </div>
           <PlanBadge tier={planTier} size="md" />
