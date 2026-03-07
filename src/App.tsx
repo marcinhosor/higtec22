@@ -12,6 +12,7 @@ import Dashboard from "@/pages/Dashboard";
 import Agenda from "@/pages/Agenda";
 import Clientes from "@/pages/Clientes";
 import Orcamentos from "@/pages/Orcamentos";
+import Produtos from "@/pages/Produtos";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/agenda" element={<ProtectedPage><Agenda /></ProtectedPage>} />
           <Route path="/clientes" element={<ProtectedPage><Clientes /></ProtectedPage>} />
           <Route path="/orcamentos" element={<ProtectedPage><Orcamentos /></ProtectedPage>} />
+          <Route path="/produtos" element={<ProtectedPage><Produtos /></ProtectedPage>} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>
