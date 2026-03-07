@@ -1,18 +1,12 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
-import { TrendingUp, DollarSign, Users, Star, ChevronLeft, ChevronRight } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { DollarSign, TrendingUp, Wrench, FlaskConical, Users, UserX, ChevronDown } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, CartesianGrid, Tooltip } from "recharts";
 
 interface YearStats {
-  annualRevenue: number;
-  monthlyAvg: number;
-  avgMargin: number;
-  avgTicket: number;
-  topService: string;
-  topProduct: string;
-  activeClients: number;
-  inactiveClients: number;
+  annualRevenue: number; monthlyAvg: number; avgMargin: number; avgTicket: number;
+  topService: string; topProduct: string; activeClients: number; inactiveClients: number;
   monthlyData: { month: string; value: number }[];
 }
 
@@ -24,135 +18,116 @@ const Painel = () => {
   const [stats, setStats] = useState<YearStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (companyId) loadStats();
-  }, [companyId, year]);
+  useEffect(() => { if (companyId) loadStats(); }, [companyId, year]);
 
   const loadStats = async () => {
     if (!companyId) return;
     setLoading(true);
+    const startDate = `${year}-01-01`;
+    const endDate = `${year}-12-31T23:59:59`;
 
-    const startDate = `${year}-01-01T00:00:00Z`;
-    const endDate = `${year}-12-31T23:59:59Z`;
-
-    const [quotesRes, clientsRes, appointmentsRes] = await Promise.all([
-      supabase.from("quotes").select("*").eq("company_id", companyId).gte("created_at", startDate).lte("created_at", endDate),
+    const [quotesRes, clientsRes] = await Promise.all([
+      supabase.from("quotes").select("*").eq("company_id", companyId).eq("status", "approved").gte("created_at", startDate).lte("created_at", endDate),
       supabase.from("clients").select("id, created_at").eq("company_id", companyId),
-      supabase.from("appointments").select("id, date, status").eq("company_id", companyId).gte("date", `${year}-01-01`).lte("date", `${year}-12-31`),
     ]);
 
     const quotes = quotesRes.data || [];
     const clients = clientsRes.data || [];
-    const appointments = appointmentsRes.data || [];
 
-    const approved = quotes.filter((q) => q.status === "approved");
-    const serviceCount: Record<string, number> = {};
-    const monthlyRevenue = new Array(12).fill(0);
-
-    let totalRevenue = 0;
-    approved.forEach((q) => {
-      const month = new Date(q.created_at).getMonth();
-      const services = (q.services as any[]) || [];
-      services.forEach((s: any) => {
-        const total = (s.quantity || 1) * (s.price || 0);
-        totalRevenue += total;
-        monthlyRevenue[month] += total;
-        serviceCount[s.name || "Serviço"] = (serviceCount[s.name || "Serviço"] || 0) + 1;
-      });
+    const monthlyData = MONTHS.map((month, i) => {
+      const monthQuotes = quotes.filter(q => new Date(q.created_at).getMonth() === i);
+      const revenue = monthQuotes.reduce((sum, q) => {
+        const svcs = (q.services as any[]) || [];
+        return sum + svcs.reduce((s: number, sv: any) => s + ((sv.quantity || 1) * (sv.unitPrice || 0)), 0);
+      }, 0);
+      return { month, value: revenue };
     });
 
-    const activeIds = new Set(appointments.map((a) => a.id));
-    const now = new Date();
-    const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
-    const activeClients = clients.filter((c) => new Date(c.created_at) >= sixMonthsAgo).length;
+    const annualRevenue = monthlyData.reduce((s, m) => s + m.value, 0);
+    const activeMonths = monthlyData.filter(m => m.value > 0).length || 1;
 
+    const serviceCount: Record<string, number> = {};
+    quotes.forEach(q => { ((q.services as any[]) || []).forEach((s: any) => { serviceCount[s.name || "-"] = (serviceCount[s.name || "-"] || 0) + 1; }); });
     const topService = Object.entries(serviceCount).sort((a, b) => b[1] - a[1])[0]?.[0] || "-";
-    const currentMonth = now.getFullYear() === year ? now.getMonth() + 1 : 12;
+
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const activeClients = clients.filter(c => new Date(c.created_at) >= sixMonthsAgo).length;
 
     setStats({
-      annualRevenue: totalRevenue,
-      monthlyAvg: currentMonth > 0 ? totalRevenue / currentMonth : 0,
-      avgMargin: totalRevenue > 0 ? 65 : 0,
-      avgTicket: approved.length > 0 ? totalRevenue / approved.length : 0,
-      topService,
-      topProduct: "-",
-      activeClients,
-      inactiveClients: Math.max(0, clients.length - activeClients),
-      monthlyData: MONTHS.map((m, i) => ({ month: m, value: monthlyRevenue[i] })),
+      annualRevenue, monthlyAvg: annualRevenue / activeMonths,
+      avgMargin: annualRevenue > 0 ? 100 : 0,
+      avgTicket: quotes.length > 0 ? annualRevenue / quotes.length : 0,
+      topService, topProduct: "-",
+      activeClients, inactiveClients: clients.length - activeClients,
+      monthlyData,
     });
     setLoading(false);
   };
 
   const currency = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
-  if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
+  const kpis = stats ? [
+    { label: "FATURAMENTO ANUAL", value: currency(stats.annualRevenue), icon: DollarSign, bg: "bg-blue-50" },
+    { label: "FATURAMENTO MENSAL", value: currency(stats.monthlyAvg), icon: DollarSign, bg: "bg-blue-50" },
+    { label: "MARGEM REAL", value: `${stats.avgMargin.toFixed(1)}%`, icon: TrendingUp, bg: "bg-white border border-slate-100" },
+    { label: "TICKET MÉDIO", value: currency(stats.avgTicket), icon: DollarSign, bg: "bg-white border border-slate-100" },
+    { label: "SERVIÇO TOP", value: stats.topService, icon: Wrench, bg: "bg-white border border-slate-100", sub: `${stats.annualRevenue > 0 ? "1" : "0"}x` },
+    { label: "PRODUTO TOP", value: stats.topProduct, icon: FlaskConical, bg: "bg-white border border-slate-100", sub: "0x" },
+    { label: "CLIENTES ATIVOS", value: stats.activeClients.toString(), icon: Users, bg: "bg-white border border-slate-100", sub: `de ${stats.activeClients + stats.inactiveClients}` },
+    { label: "INATIVOS", value: stats.inactiveClients.toString(), icon: UserX, bg: "bg-white border border-slate-100" },
+  ] : [];
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h2 className="text-xl font-semibold text-slate-800">Painel Estratégico</h2>
-          <p className="text-sm text-slate-500">Visão executiva da empresa</p>
+      <h2 className="text-xl font-bold text-slate-800 mb-5">Painel Estratégico</h2>
+
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-2">
+          <TrendingUp size={22} className="text-blue-600" />
+          <h3 className="font-bold text-slate-800 text-lg">Visão Executiva</h3>
         </div>
-        <div className="flex items-center gap-2 bg-white rounded-lg border border-slate-200 px-2 py-1">
-          <button onClick={() => setYear(year - 1)} className="p-1 hover:bg-slate-100 rounded">
-            <ChevronLeft size={16} />
-          </button>
-          <span className="text-sm font-semibold text-slate-700 w-12 text-center">{year}</span>
-          <button onClick={() => setYear(year + 1)} className="p-1 hover:bg-slate-100 rounded">
-            <ChevronRight size={16} />
-          </button>
+        <div className="relative">
+          <select value={year} onChange={(e) => setYear(Number(e.target.value))} className="appearance-none bg-white border border-slate-200 rounded-lg px-4 py-2 pr-8 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>{y}</option>)}
+          </select>
+          <ChevronDown size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
         </div>
       </div>
 
-      {stats && (
-        <div className="space-y-4">
-          {/* KPI cards */}
-          <div className="grid grid-cols-2 gap-3">
-            <KPI icon={DollarSign} label="Faturamento anual" value={currency(stats.annualRevenue)} color="text-blue-600" bg="bg-blue-50" />
-            <KPI icon={DollarSign} label="Faturamento mensal" value={currency(stats.monthlyAvg)} color="text-emerald-600" bg="bg-emerald-50" />
-            <KPI icon={TrendingUp} label="Margem real" value={`${stats.avgMargin}%`} color="text-amber-600" bg="bg-amber-50" />
-            <KPI icon={DollarSign} label="Ticket médio" value={currency(stats.avgTicket)} color="text-purple-600" bg="bg-purple-50" />
-            <KPI icon={Star} label="Serviço top" value={stats.topService} color="text-cyan-600" bg="bg-cyan-50" />
-            <KPI icon={Star} label="Produto top" value={stats.topProduct} color="text-pink-600" bg="bg-pink-50" />
-            <KPI icon={Users} label="Clientes ativos" value={String(stats.activeClients)} color="text-emerald-600" bg="bg-emerald-50" />
-            <KPI icon={Users} label="Inativos" value={String(stats.inactiveClients)} color="text-red-600" bg="bg-red-50" />
+      {loading ? (
+        <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" /></div>
+      ) : (
+        <>
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {kpis.map(({ label, value, icon: Icon, bg, sub }) => (
+              <div key={label} className={`${bg} rounded-xl p-4`}>
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Icon size={14} className="text-blue-600" />
+                  <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wide">{label}</span>
+                </div>
+                <p className="text-xl font-bold text-slate-800 truncate">{value}</p>
+                {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+              </div>
+            ))}
           </div>
 
-          {/* Chart */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5">
-            <h3 className="font-semibold text-slate-800 mb-4">Faturamento Mensal</h3>
-            <div className="h-56">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={stats.monthlyData}>
-                  <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} />
-                  <Tooltip formatter={(v: number) => currency(v)} />
-                  <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+          <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm">
+            <h3 className="font-bold text-slate-800 mb-4">Faturamento vs Custo (Mensal)</h3>
+            <ResponsiveContainer width="100%" height={220}>
+              <BarChart data={stats?.monthlyData || []}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <XAxis dataKey="month" tick={{ fontSize: 11 }} />
+                <YAxis tick={{ fontSize: 11 }} />
+                <Tooltip formatter={(v: number) => currency(v)} />
+                <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
           </div>
-        </div>
+        </>
       )}
     </div>
   );
 };
-
-const KPI = ({ icon: Icon, label, value, color, bg }: { icon: typeof DollarSign; label: string; value: string; color: string; bg: string }) => (
-  <div className="bg-white rounded-xl border border-slate-200 p-4">
-    <div className={`w-8 h-8 ${bg} rounded-lg flex items-center justify-center mb-2`}>
-      <Icon size={16} className={color} />
-    </div>
-    <p className="text-lg font-bold text-slate-800 truncate">{value}</p>
-    <p className="text-xs text-slate-500">{label}</p>
-  </div>
-);
 
 export default Painel;
