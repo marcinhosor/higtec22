@@ -135,26 +135,20 @@ const Clientes = () => {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6">
+      <div className="flex items-center justify-between mb-5">
         <div>
-          <h2 className="text-xl font-semibold text-slate-800">Clientes</h2>
-          <p className="text-sm text-slate-500">{clients.length} cliente{clients.length !== 1 ? "s" : ""} cadastrado{clients.length !== 1 ? "s" : ""}</p>
+          <h2 className="text-xl font-bold text-slate-800">Clientes</h2>
+          <p className="text-sm text-slate-400">{clients.length} cliente{clients.length !== 1 ? "s" : ""}</p>
         </div>
-        <button onClick={openNew} className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-sm font-medium transition">
-          <Plus size={16} /> Novo Cliente
+        <button onClick={openNew} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-full text-sm font-semibold transition shadow-sm">
+          <Plus size={16} /> Novo
         </button>
       </div>
 
-      {/* Search */}
       <div className="relative mb-4">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar por nome ou telefone..."
-          className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+        <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Buscar por nome ou telefone..."
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
       </div>
 
       {/* List */}
@@ -183,7 +177,7 @@ const Clientes = () => {
                   className="p-4 flex items-center gap-3 cursor-pointer hover:bg-slate-50 transition"
                   onClick={() => setExpandedId(expanded ? null : c.id)}
                 >
-                  <div className="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                  <div className="w-10 h-10 bg-sky-50 text-sky-600 rounded-full flex items-center justify-center font-semibold text-sm flex-shrink-0">
                     {c.name.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex-1 min-w-0">

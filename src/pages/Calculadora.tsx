@@ -88,7 +88,7 @@ const Calculadora = () => {
           </div>
 
           {/* Calculate */}
-          <button onClick={handleCalculate} disabled={!dilution || !waterVolume} className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-sm font-bold transition disabled:opacity-40">
+          <button onClick={handleCalculate} disabled={!dilution || !waterVolume} className="w-full py-3 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl text-sm font-bold transition disabled:opacity-40 shadow-sm">
             Calcular
           </button>
 
