@@ -28,10 +28,10 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top Header */}
       {!isHome && (
-        <header className="bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-          <h1 className="text-lg font-bold text-slate-800">{pageTitle}</h1>
-          <Link to="/" className="text-sm font-black text-slate-400 hover:text-sky-500 transition">
-            Hig<span className="text-sky-500">Tec</span>
+        <header className="bg-card border-b border-border px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
+          <h1 className="text-lg font-bold text-foreground">{pageTitle}</h1>
+          <Link to="/" className="text-sm font-black text-muted-foreground hover:text-primary transition">
+            Hig<span className="text-primary">Tec</span>
           </Link>
         </header>
       )}

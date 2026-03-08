@@ -21,8 +21,8 @@ const BottomNav = () => {
             <Link
               key={to}
               to={to}
-              className={`flex flex-col items-center gap-0.5 px-3 py-1 min-w-[56px] transition ${
-                active ? "text-sky-500" : "text-slate-400 hover:text-slate-500"
+            className={`flex flex-col items-center gap-0.5 px-3 py-1 min-w-[56px] transition ${
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <Icon size={22} strokeWidth={active ? 2.4 : 1.8} />
