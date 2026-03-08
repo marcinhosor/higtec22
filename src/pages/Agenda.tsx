@@ -75,16 +75,16 @@ const Agenda = () => {
     setLoading(false);
   };
 
-  const resetForm = () => { setFormClientId(""); setFormTime("08:00"); setFormService(""); setFormCollaboratorId(""); setFormNotes(""); setFormStatus("pending"); setEditingId(null); };
+  const resetForm = () => { setFormClientId(""); setFormTime("08:00"); setFormService(""); setFormCollaboratorId(""); setFormNotes(""); setFormStatus("pending"); setFormDate(dateStr); setEditingId(null); };
   const openNew = () => { resetForm(); setShowForm(true); };
-  const openEdit = (apt: Appointment) => { setFormClientId(apt.client_id); setFormTime(apt.time); setFormService(apt.service || ""); setFormCollaboratorId(apt.collaborator_id || ""); setFormNotes(apt.notes || ""); setFormStatus(apt.status || "pending"); setEditingId(apt.id); setShowForm(true); };
+  const openEdit = (apt: Appointment) => { setFormClientId(apt.client_id); setFormTime(apt.time); setFormService(apt.service || ""); setFormCollaboratorId(apt.collaborator_id || ""); setFormNotes(apt.notes || ""); setFormStatus(apt.status || "pending"); setFormDate(apt.date); setEditingId(apt.id); setShowForm(true); };
 
   const handleSave = async () => {
-    if (!companyId || !formClientId || !formTime) { toast.error("Preencha cliente e horário"); return; }
+    if (!companyId || !formClientId || !formTime || !formDate) { toast.error("Preencha cliente, data e horário"); return; }
     setSaving(true);
     const client = clients.find((c) => c.id === formClientId);
     const collab = collaborators.find((c) => c.id === formCollaboratorId);
-    const payload = { company_id: companyId, client_id: formClientId, client_name: client?.name || "", date: dateStr, time: formTime, service: formService || null, collaborator_id: formCollaboratorId || null, collaborator_name: collab?.name || null, notes: formNotes || null, status: formStatus };
+    const payload = { company_id: companyId, client_id: formClientId, client_name: client?.name || "", date: formDate, time: formTime, service: formService || null, collaborator_id: formCollaboratorId || null, collaborator_name: collab?.name || null, notes: formNotes || null, status: formStatus };
     let error;
     if (editingId) ({ error } = await supabase.from("appointments").update(payload).eq("id", editingId));
     else ({ error } = await supabase.from("appointments").insert(payload));
