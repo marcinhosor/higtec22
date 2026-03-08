@@ -3,9 +3,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Plus, Search, X, Edit2, Trash2, Phone, MapPin, User, Eye, ChevronDown
+  Plus, Search, X, Edit2, Trash2, Phone, MapPin, User, Eye, ChevronDown, ContactRound
 } from "lucide-react";
 
+const capitalize = (s: string) =>
+  s.replace(/(^|\s)\S/g, (l) => l.toUpperCase());
+
+const cleanPhone = (raw: string) =>
+  raw.replace(/^\+55\s?/, "").replace(/[^\d]/g, "");
+
+const Field = ({ label, value, onChange, placeholder, type = "text", className = "", autoCapWords }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; className?: string; autoCapWords?: boolean;
+}) => (
+  <div className={className}>
+    <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(autoCapWords ? capitalize(e.target.value) : e.target.value)}
+      placeholder={placeholder}
+      autoCapitalize={autoCapWords ? "words" : undefined}
+      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+);
 const ESTADOS_BR = [
   "AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT",
   "PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"
@@ -120,18 +141,24 @@ const Clientes = () => {
     return parts.join(", ") || null;
   };
 
-  const Field = ({ label, value, onChange, placeholder, type = "text", className = "" }: any) => (
-    <div className={className}>
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-    </div>
-  );
+  const importContact = async () => {
+    try {
+      if (!("contacts" in navigator)) {
+        toast.error("Importação de contatos não suportada neste navegador");
+        return;
+      }
+      const contacts = await (navigator as any).contacts.select(["name", "tel"], { multiple: false });
+      if (contacts?.length) {
+        const c = contacts[0];
+        const name = capitalize((c.name?.[0] || "").trim());
+        const phone = cleanPhone(c.tel?.[0] || "");
+        setForm(f => ({ ...f, name: name || f.name, phone: phone || f.phone }));
+        toast.success("Contato importado!");
+      }
+    } catch {
+      toast.info("Importação cancelada");
+    }
+  };
 
   return (
     <div>
@@ -230,21 +257,26 @@ const Clientes = () => {
             </div>
 
             <div className="p-5 space-y-4">
-              <Field label="Nome *" value={form.name} onChange={(v: string) => setForm({ ...form, name: v })} placeholder="Nome do cliente" />
+              <div className="flex gap-2 items-end">
+                <Field label="Nome *" value={form.name} onChange={(v: string) => setForm({ ...form, name: v })} placeholder="Nome do cliente" autoCapWords className="flex-1" />
+                <button type="button" onClick={importContact} className="mb-0.5 p-2.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition" title="Importar da agenda">
+                  <ContactRound size={18} />
+                </button>
+              </div>
               <Field label="Telefone" value={form.phone} onChange={(v: string) => setForm({ ...form, phone: v })} placeholder="(00) 00000-0000" type="tel" />
 
               <div className="border-t border-slate-100 pt-4">
                 <p className="text-sm font-medium text-slate-600 mb-3">Endereço</p>
                 <div className="grid grid-cols-3 gap-3">
-                  <Field label="Rua" value={form.street} onChange={(v: string) => setForm({ ...form, street: v })} placeholder="Rua" className="col-span-2" />
+                  <Field label="Rua" value={form.street} onChange={(v: string) => setForm({ ...form, street: v })} placeholder="Rua" className="col-span-2" autoCapWords />
                   <Field label="Número" value={form.number} onChange={(v: string) => setForm({ ...form, number: v })} placeholder="Nº" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  <Field label="Complemento" value={form.complement} onChange={(v: string) => setForm({ ...form, complement: v })} placeholder="Apto, bloco..." />
-                  <Field label="Bairro" value={form.neighborhood} onChange={(v: string) => setForm({ ...form, neighborhood: v })} placeholder="Bairro" />
+                  <Field label="Complemento" value={form.complement} onChange={(v: string) => setForm({ ...form, complement: v })} placeholder="Apto, bloco..." autoCapWords />
+                  <Field label="Bairro" value={form.neighborhood} onChange={(v: string) => setForm({ ...form, neighborhood: v })} placeholder="Bairro" autoCapWords />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  <Field label="Cidade" value={form.city} onChange={(v: string) => setForm({ ...form, city: v })} placeholder="Cidade" />
+                  <Field label="Cidade" value={form.city} onChange={(v: string) => setForm({ ...form, city: v })} placeholder="Cidade" autoCapWords />
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Estado</label>
                     <select
