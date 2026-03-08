@@ -82,12 +82,20 @@ const InputField = ({ label, value, onChange, placeholder }: { label: string; va
   </div>
 );
 
+const ColorSwatch = ({ color, label }: { color: string; label: string }) => (
+  <div className="flex flex-col items-center gap-1.5">
+    <div className="w-12 h-12 rounded-xl border-2 border-white shadow-md" style={{ backgroundColor: color }} />
+    <span className="text-[10px] text-slate-500 font-medium">{label}</span>
+  </div>
+);
+
 const Configuracoes = () => {
   const { companyId, signOut } = useAuth();
   const { planTier } = useCompanyPlan();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState("default");
+  const [customColors, setCustomColors] = useState({ primary: "#3b82f6", secondary: "#dbeafe", accent: "#1e40af" });
   const [form, setForm] = useState({ name: "", phone: "", cnpj: "" });
 
   useEffect(() => { if (companyId) loadCompany(); }, [companyId]);
@@ -98,6 +106,8 @@ const Configuracoes = () => {
     if (data) {
       setForm({ name: data.name || "", phone: data.phone || "", cnpj: data.cnpj || "" });
       setSelectedTheme(data.selected_theme_id || "default");
+      const theme = data.custom_theme as any;
+      if (theme?.primary) setCustomColors({ primary: theme.primary, secondary: theme.secondary || "#dbeafe", accent: theme.accent || "#1e40af" });
     }
     setLoading(false);
   };
@@ -114,11 +124,42 @@ const Configuracoes = () => {
     setSaving(false);
   };
 
+  const handleApplyPalette = async () => {
+    if (!companyId) return;
+    setSaving(true);
+    const preset = PALETTE_PRESETS.find(p => p.id === selectedTheme);
+    const themeData = preset ? preset.colors : customColors;
+    const { error } = await supabase.from("companies").update({
+      selected_theme_id: selectedTheme,
+      custom_theme: themeData,
+    }).eq("id", companyId);
+    if (error) toast.error("Erro ao salvar paleta");
+    else toast.success("Paleta aplicada com sucesso!");
+    setSaving(false);
+  };
+
+  const handleApplyCustomColors = async () => {
+    if (!companyId) return;
+    setSaving(true);
+    const { error } = await supabase.from("companies").update({
+      selected_theme_id: "custom",
+      custom_theme: customColors,
+    }).eq("id", companyId);
+    if (error) toast.error("Erro ao salvar cores");
+    else {
+      setSelectedTheme("custom");
+      toast.success("Cores personalizadas aplicadas!");
+    }
+    setSaving(false);
+  };
+
   const canUseTheme = (tier: string) => {
     if (tier === "free") return true;
     if (tier === "pro") return planTier === "pro" || planTier === "premium";
     return planTier === "premium";
   };
+
+  const activePreset = PALETTE_PRESETS.find(p => p.id === selectedTheme) || PALETTE_PRESETS[0];
 
   const planIcons = { free: Star, pro: Zap, premium: Crown };
   const planColors = { free: "bg-slate-100 text-slate-600", pro: "bg-sky-100 text-sky-700", premium: "bg-amber-100 text-amber-700" };
@@ -158,7 +199,6 @@ const Configuracoes = () => {
             <InputField label="CNPJ (opcional)" value={form.cnpj} onChange={(v) => setForm({ ...form, cnpj: v })} placeholder="00.000.000/0001-00" />
           </div>
         </div>
-
         <button
           onClick={handleSave}
           disabled={saving}
@@ -172,7 +212,6 @@ const Configuracoes = () => {
       {/* 2. Plano da Conta */}
       <SectionCard className="p-6">
         <SectionHeader icon={Shield} title="Plano da Conta" subtitle="Gerencie sua assinatura e benefícios" />
-
         <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-sky-50/50 border border-slate-100 mb-4">
           <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${planColors[planTier]}`}>
             <PlanIcon size={22} />
@@ -184,7 +223,6 @@ const Configuracoes = () => {
             <p className="text-xs text-slate-400">{currentPlan.price} • {currentPlan.features[0]}</p>
           </div>
         </div>
-
         <div className="grid grid-cols-2 gap-2 mb-4">
           {currentPlan.features.slice(0, 4).map((f) => (
             <div key={f} className="flex items-start gap-1.5 text-xs text-slate-500 p-2 rounded-lg bg-slate-50">
@@ -193,7 +231,6 @@ const Configuracoes = () => {
             </div>
           ))}
         </div>
-
         <Link
           to="/checkout"
           className="flex items-center justify-between w-full p-3.5 rounded-xl border border-sky-100 bg-sky-50/50 hover:bg-sky-50 transition group"
@@ -206,155 +243,193 @@ const Configuracoes = () => {
         </Link>
       </SectionCard>
 
-      {/* 3. Personalização Visual */}
+      {/* ===== SEÇÃO 3: PALETA ATUAL ===== */}
       <SectionCard className="p-6">
-        <SectionHeader icon={Palette} title="Personalização Visual" subtitle="Escolha a paleta de cores do sistema e PDFs" />
-
-        {/* Paleta Original - always visible */}
-        <div className="mb-4">
-          <div className={`p-4 rounded-xl border-2 transition-all ${
-            selectedTheme === "default"
-              ? "border-sky-400 bg-sky-50/60 shadow-sm"
-              : "border-slate-100"
-          }`}>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-bold text-slate-800">Paleta Original HigTec</span>
-              {selectedTheme === "default" && (
-                <div className="w-5 h-5 bg-sky-500 rounded-full flex items-center justify-center">
-                  <Check size={12} className="text-white" />
-                </div>
-              )}
-            </div>
-            <div className="grid grid-cols-5 gap-2 mb-3">
-              {DEFAULT_PALETTE.colors.map((c, i) => (
-                <div key={i} className="flex flex-col items-center gap-1">
-                  <div
-                    className="w-10 h-10 rounded-xl border-2 border-white shadow-sm"
-                    style={{ backgroundColor: c.hex }}
-                  />
-                  <span className="text-[10px] text-slate-400 font-medium">{c.label}</span>
-                </div>
-              ))}
-            </div>
-            {planTier === "free" && selectedTheme !== "default" ? (
-              <button
-                onClick={() => {
-                  setSelectedTheme("default");
-                  handleSave();
-                }}
-                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 text-white text-sm font-semibold transition hover:from-sky-500 hover:to-sky-600"
-              >
-                Usar paleta original
-              </button>
-            ) : planTier === "free" && selectedTheme === "default" ? (
-              <p className="text-xs text-sky-500 font-medium text-center">✓ Paleta ativa</p>
-            ) : null}
+        <SectionHeader icon={Palette} title="Paleta atual do sistema" subtitle="Preview da paleta de cores ativa" />
+        <div className="p-5 rounded-xl bg-gradient-to-br from-slate-50 to-white border border-slate-100">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-sm font-bold text-slate-700">{activePreset.name}</span>
+            <div className="px-2 py-0.5 rounded-full bg-sky-100 text-[10px] font-semibold text-sky-600 uppercase">Ativa</div>
           </div>
+          <div className="flex gap-4 mb-5">
+            <ColorSwatch color={activePreset.colors.primary} label="Primary" />
+            <ColorSwatch color={activePreset.colors.secondary} label="Secondary" />
+            <ColorSwatch color={activePreset.colors.accent} label="Accent" />
+            <ColorSwatch color={activePreset.colors.background} label="Background" />
+          </div>
+          <button
+            onClick={handleApplyPalette}
+            disabled={saving}
+            className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-sm"
+          >
+            <Check size={16} />
+            {saving ? "Aplicando..." : "Aplicar paleta"}
+          </button>
         </div>
+      </SectionCard>
 
-        {/* Personalização de cores - locked for free */}
-        {planTier === "free" ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 mb-2">
-              <Lock size={14} className="text-slate-300" />
-              <span className="text-sm font-semibold text-slate-500">Personalização de cores</span>
-            </div>
-            <p className="text-xs text-slate-400 mb-3">
-              Personalização de cores disponível apenas nos planos Premium e Pro.
-            </p>
+      {/* ===== SEÇÃO 4: PALETAS DISPONÍVEIS ===== */}
+      <SectionCard className="p-6">
+        <SectionHeader icon={Palette} title="Paletas de cores" subtitle="Escolha entre paletas profissionais" />
+        <div className="grid grid-cols-1 gap-3">
+          {PALETTE_PRESETS.map((preset) => {
+            const available = canUseTheme(preset.tier);
+            const isSelected = selectedTheme === preset.id;
+            const tierLabel = preset.tier === "pro" ? "Pro" : preset.tier === "premium" ? "Premium" : null;
 
-            {/* Preview of premium themes - locked */}
-            <div className="space-y-2 opacity-50 pointer-events-none">
-              {PREMIUM_THEMES.map((theme) => (
-                <div
-                  key={theme.id}
-                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 relative"
-                >
-                  <div className="flex gap-1.5">
-                    {theme.colors.map((c, i) => (
-                      <div
-                        key={i}
-                        className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
-                        style={{ backgroundColor: c }}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-xs font-medium text-slate-600 truncate block">
-                      {theme.emoji} {theme.name}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200">
-                    <Lock size={10} className="text-amber-500" />
-                    <span className="text-[10px] text-amber-600 font-semibold uppercase">
-                      {theme.tier === "pro" ? "Pro" : "Premium"}
-                    </span>
-                  </div>
+            return (
+              <button
+                key={preset.id}
+                onClick={() => available && setSelectedTheme(preset.id)}
+                disabled={!available}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  isSelected
+                    ? "border-sky-400 bg-sky-50/60 shadow-md ring-1 ring-sky-200"
+                    : available
+                      ? "border-slate-100 hover:border-slate-200 hover:shadow-sm"
+                      : "border-slate-50 opacity-60 cursor-not-allowed"
+                }`}
+              >
+                {/* Color dots */}
+                <div className="flex gap-1.5 flex-shrink-0">
+                  {Object.values(preset.colors).map((c, i) => (
+                    <div key={i} className="w-8 h-8 rounded-lg border-2 border-white shadow-sm" style={{ backgroundColor: c }} />
+                  ))}
                 </div>
-              ))}
-            </div>
 
-            <Link
-              to="/checkout"
-              className="flex items-center justify-center gap-2 w-full py-3 mt-2 rounded-xl border border-sky-100 bg-sky-50/50 hover:bg-sky-50 transition text-sm font-medium text-sky-700"
-            >
-              <Crown size={16} className="text-sky-500" />
-              Ver planos
-            </Link>
-          </div>
-        ) : (
-          /* Pro/Premium: full theme picker */
-          <div className="space-y-2">
-            {PREMIUM_THEMES.map((theme) => {
-              const available = canUseTheme(theme.tier);
-              const isSelected = selectedTheme === theme.id;
-              return (
-                <button
-                  key={theme.id}
-                  onClick={() => available && setSelectedTheme(theme.id)}
-                  className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
-                    isSelected
-                      ? "border-sky-400 bg-sky-50/60 shadow-sm"
-                      : available
-                        ? "border-slate-100 hover:border-slate-200 hover:bg-slate-50/50"
-                        : "border-slate-50 opacity-40 cursor-not-allowed"
-                  }`}
-                >
-                  <div className="flex gap-1.5">
-                    {theme.colors.map((c, i) => (
-                      <div
-                        key={i}
-                        className="w-7 h-7 rounded-full border-2 border-white shadow-sm"
-                        style={{ backgroundColor: c }}
-                      />
-                    ))}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="text-sm font-medium text-slate-700 truncate block">
-                      {theme.emoji} {theme.name}
-                    </span>
-                    {!available && (
-                      <span className="text-[10px] text-amber-500 font-medium uppercase tracking-wide">
-                        {theme.tier === "pro" ? "Pro" : "Premium"}
-                      </span>
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-700 truncate">{preset.name}</span>
+                    {isSelected && (
+                      <div className="w-5 h-5 bg-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        <Check size={12} className="text-white" />
+                      </div>
                     )}
                   </div>
-                  {isSelected && (
-                    <div className="w-6 h-6 bg-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Check size={14} className="text-white" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+                  <span className="text-xs text-slate-400">{preset.subtitle}</span>
+                </div>
+
+                {/* Lock badge */}
+                {!available && tierLabel && (
+                  <div className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-50 border border-amber-200 flex-shrink-0">
+                    <Lock size={10} className="text-amber-500" />
+                    <span className="text-[10px] text-amber-600 font-bold uppercase">{tierLabel}</span>
+                  </div>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {planTier === "free" && (
+          <div className="mt-4 p-4 rounded-xl bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-100">
+            <p className="text-xs text-amber-700 mb-3 font-medium">
+              Disponível nos planos Premium e Pro.
+            </p>
+            <Link
+              to="/checkout"
+              className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white text-sm font-semibold transition shadow-sm"
+            >
+              <Crown size={14} />
+              Ver planos
+            </Link>
           </div>
         )}
       </SectionCard>
 
-      {/* 4. Configurações do Sistema */}
+      {/* ===== SEÇÃO 5: PERSONALIZAÇÃO AVANÇADA ===== */}
+      <SectionCard className="p-6">
+        <SectionHeader icon={Settings2} title="Cores personalizadas" subtitle="Defina cores únicas para sua marca" />
+
+        {planTier === "pro" || planTier === "premium" ? (
+          planTier === "pro" ? (
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {[
+                  { key: "primary" as const, label: "Primary color" },
+                  { key: "secondary" as const, label: "Secondary color" },
+                  { key: "accent" as const, label: "Accent color" },
+                ].map(({ key, label }) => (
+                  <div key={key}>
+                    <label className="block text-xs font-medium text-slate-500 mb-2">{label}</label>
+                    <div className="flex items-center gap-3 p-3 rounded-xl border border-slate-200 bg-slate-50/50">
+                      <input
+                        type="color"
+                        value={customColors[key]}
+                        onChange={(e) => setCustomColors({ ...customColors, [key]: e.target.value })}
+                        className="w-10 h-10 rounded-lg border-0 cursor-pointer"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-mono text-slate-600">{customColors[key]}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Live preview */}
+              <div className="p-4 rounded-xl border border-slate-100 bg-white">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Preview</p>
+                <div className="flex gap-3 mb-3">
+                  <ColorSwatch color={customColors.primary} label="Primary" />
+                  <ColorSwatch color={customColors.secondary} label="Secondary" />
+                  <ColorSwatch color={customColors.accent} label="Accent" />
+                </div>
+                <div className="flex gap-2">
+                  <div className="px-4 py-2 rounded-lg text-white text-xs font-semibold" style={{ backgroundColor: customColors.primary }}>
+                    Botão primário
+                  </div>
+                  <div className="px-4 py-2 rounded-lg text-xs font-semibold border" style={{ borderColor: customColors.accent, color: customColors.accent }}>
+                    Botão secundário
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleApplyCustomColors}
+                disabled={saving}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl text-sm font-semibold transition disabled:opacity-50 shadow-sm"
+              >
+                <Palette size={16} />
+                {saving ? "Aplicando..." : "Aplicar cores personalizadas"}
+              </button>
+            </div>
+          ) : (
+            /* Premium but not Pro - locked */
+            <div className="p-5 rounded-xl bg-slate-50 border border-slate-100 text-center">
+              <Lock size={24} className="text-slate-300 mx-auto mb-3" />
+              <p className="text-sm font-medium text-slate-500 mb-1">Personalização completa disponível apenas no plano Pro.</p>
+              <p className="text-xs text-slate-400 mb-4">Faça upgrade para definir cores únicas.</p>
+              <Link
+                to="/checkout"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-amber-400 to-orange-400 hover:from-amber-500 hover:to-orange-500 text-white text-sm font-semibold transition shadow-sm"
+              >
+                <Crown size={14} />
+                Ver planos
+              </Link>
+            </div>
+          )
+        ) : (
+          /* Free - locked */
+          <div className="p-5 rounded-xl bg-slate-50 border border-slate-100 text-center">
+            <Lock size={24} className="text-slate-300 mx-auto mb-3" />
+            <p className="text-sm font-medium text-slate-500 mb-1">Personalização disponível nos planos Premium e Pro.</p>
+            <p className="text-xs text-slate-400 mb-4">Escolha suas próprias cores e destaque sua marca.</p>
+            <Link
+              to="/checkout"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white text-sm font-semibold transition shadow-sm"
+            >
+              <Crown size={14} />
+              Ver planos
+            </Link>
+          </div>
+        )}
+      </SectionCard>
+
+      {/* 6. Configurações do Sistema */}
       <SectionCard className="p-6">
         <SectionHeader icon={Settings2} title="Configurações do Sistema" subtitle="Preferências gerais do aplicativo" />
-
         <div className="space-y-3">
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <div>
@@ -365,7 +440,6 @@ const Configuracoes = () => {
               <div className="w-5 h-5 bg-white rounded-full shadow-sm" />
             </div>
           </div>
-
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <div>
               <p className="text-sm font-medium text-slate-700">Confirmação de exclusão</p>
@@ -375,7 +449,6 @@ const Configuracoes = () => {
               <div className="w-5 h-5 bg-white rounded-full shadow-sm" />
             </div>
           </div>
-
           <div className="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-100">
             <div>
               <p className="text-sm font-medium text-slate-700">Modo compacto</p>
@@ -388,7 +461,7 @@ const Configuracoes = () => {
         </div>
       </SectionCard>
 
-      {/* Footer info */}
+      {/* Footer */}
       <div className="text-center pt-2 pb-4">
         <p className="text-xs text-slate-300">HigTec v2.0 • Gestão profissional de higienização</p>
       </div>
