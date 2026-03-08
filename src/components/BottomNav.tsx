@@ -1,11 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Calendar, BarChart3, Settings } from "lucide-react";
+import { Home, Users, Calendar, Calculator, FlaskConical, Settings } from "lucide-react";
 
 const items = [
-  { to: "/", icon: Home, label: "Início" },
   { to: "/clientes", icon: Users, label: "Clientes" },
   { to: "/agenda", icon: Calendar, label: "Agenda" },
-  { to: "/relatorios", icon: BarChart3, label: "Relatórios" },
+  { to: "/", icon: Home, label: "Início" },
+  { to: "/calculadora", icon: Calculator, label: "Cálculo" },
   { to: "/configuracoes", icon: Settings, label: "Config" },
 ];
 
