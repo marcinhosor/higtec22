@@ -1,11 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, Users, Calendar, Calculator, FlaskConical, Settings } from "lucide-react";
+import { Home, Users, Calendar, Receipt, Package, Settings } from "lucide-react";
 
 const items = [
+  { to: "/", icon: Home, label: "Início" },
   { to: "/clientes", icon: Users, label: "Clientes" },
   { to: "/agenda", icon: Calendar, label: "Agenda" },
-  { to: "/", icon: Home, label: "Início" },
-  { to: "/calculadora", icon: Calculator, label: "Cálculo" },
+  { to: "/orcamentos", icon: Receipt, label: "Orçam." },
+  { to: "/produtos", icon: Package, label: "Produtos" },
   { to: "/configuracoes", icon: Settings, label: "Config" },
 ];
 
@@ -21,11 +22,11 @@ const BottomNav = () => {
             <Link
               key={to}
               to={to}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1 min-w-[56px] transition ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-1 min-w-[48px] transition ${
                 active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <Icon size={22} strokeWidth={active ? 2.4 : 1.8} />
+              <Icon size={20} strokeWidth={active ? 2.4 : 1.8} />
               <span className={`text-[10px] ${active ? "font-semibold" : "font-medium"}`}>{label}</span>
             </Link>
           );

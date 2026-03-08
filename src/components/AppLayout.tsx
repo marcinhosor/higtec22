@@ -1,10 +1,13 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ArrowLeft, LogOut } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import BottomNav from "@/components/BottomNav";
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { signOut } = useAuth();
 
-  // Derive page title from route
   const titles: Record<string, string> = {
     "/": "Início",
     "/agenda": "Agenda",
@@ -12,7 +15,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     "/orcamentos": "Orçamentos",
     "/execucao": "Execução",
     "/produtos": "Produtos",
-    "/calculadora": "Calculadora",
+    "/calculadora": "Calculadora de Diluição",
     "/equipamentos": "Equipamentos",
     "/relatorios": "Relatórios",
     "/painel": "Painel Estratégico",
@@ -24,15 +27,25 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const pageTitle = titles[location.pathname] || "HigTec";
   const isHome = location.pathname === "/";
 
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/login");
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Top Header */}
       {!isHome && (
         <header className="bg-card border-b border-border px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
-          <h1 className="text-lg font-bold text-foreground">{pageTitle}</h1>
-          <Link to="/" className="text-sm font-black text-muted-foreground hover:text-primary transition">
-            Hig<span className="text-primary">Tec</span>
-          </Link>
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate(-1)} className="text-foreground hover:text-primary transition">
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="text-lg font-bold text-foreground">{pageTitle}</h1>
+          </div>
+          <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground transition">
+            <LogOut size={20} />
+          </button>
         </header>
       )}
 
