@@ -3,9 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { Calculator, Droplets, Info } from "lucide-react";
 
-interface Product {
-  id: string; name: string; dilution: string | null; current_stock_ml: number | null;
-}
+interface Product { id: string; name: string; dilution: string | null; current_stock_ml: number | null; }
 
 const Calculadora = () => {
   const { companyId } = useAuth();
@@ -44,72 +42,64 @@ const Calculadora = () => {
 
   return (
     <div>
-      <h2 className="text-xl font-bold text-slate-800 mb-5">Calculadora de Diluição</h2>
-
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-        {/* Header with icon */}
+      <div className="bg-card rounded-2xl border border-border shadow-sm p-5">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-12 h-12 bg-slate-700 rounded-xl flex items-center justify-center">
-            <Calculator size={22} className="text-white" />
+          <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
+            <Calculator size={22} className="text-primary-foreground" />
           </div>
           <div>
-            <h3 className="font-bold text-slate-800">Calcular Diluição</h3>
-            <p className="text-sm text-slate-400">Informe os dados do fabricante</p>
+            <h3 className="font-bold text-foreground">Calcular Diluição</h3>
+            <p className="text-sm text-muted-foreground">Informe os dados do fabricante</p>
           </div>
         </div>
 
         <div className="space-y-4">
-          {/* Product selection */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Produto (opcional)</label>
-            <select value={selectedProductId} onChange={(e) => handleProductSelect(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            <label className="block text-sm font-medium text-foreground mb-1.5">Produto (opcional)</label>
+            <select value={selectedProductId} onChange={(e) => handleProductSelect(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card">
               <option value="">Selecione para baixa automática</option>
               {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
           </div>
 
           {selectedProduct && selectedProduct.current_stock_ml != null && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg text-sm text-blue-700">
+            <div className="flex items-center gap-2 px-3 py-2 bg-primary/10 rounded-lg text-sm text-primary">
               <Info size={16} /> Estoque atual: {(selectedProduct.current_stock_ml / 1000).toFixed(1)}L
             </div>
           )}
 
-          {/* Dilution */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Diluição recomendada</label>
-            <input type="text" value={dilution} onChange={(e) => { setDilution(e.target.value); setResult(null); }} placeholder="Ex: 1:10" className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            <p className="text-xs text-slate-400 mt-1">Formato: 1:10, 1:20, etc.</p>
+            <label className="block text-sm font-medium text-foreground mb-1.5">Diluição recomendada</label>
+            <input type="text" value={dilution} onChange={(e) => { setDilution(e.target.value); setResult(null); }} placeholder="Ex: 1:10" className="w-full px-3 py-2.5 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card" />
+            <p className="text-xs text-muted-foreground mt-1">Formato: 1:10, 1:20, etc.</p>
           </div>
 
-          {/* Water volume */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Volume de água (litros)</label>
-            <input type="number" value={waterVolume} onChange={(e) => { setWaterVolume(e.target.value); setResult(null); }} placeholder="Ex: 5" min="0" step="0.1" className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <label className="block text-sm font-medium text-foreground mb-1.5">Volume de água (litros)</label>
+            <input type="number" value={waterVolume} onChange={(e) => { setWaterVolume(e.target.value); setResult(null); }} placeholder="Ex: 5" min="0" step="0.1" className="w-full px-3 py-2.5 rounded-lg border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card" />
           </div>
 
-          {/* Calculate */}
-          <button onClick={handleCalculate} disabled={!dilution || !waterVolume} className="w-full py-3 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-xl text-sm font-bold transition disabled:opacity-40 shadow-sm">
+          <button onClick={handleCalculate} disabled={!dilution || !waterVolume} className="w-full py-3 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl text-sm font-bold transition disabled:opacity-40 shadow-sm">
             Calcular
           </button>
 
-          {/* Result */}
           {result && (
-            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl border border-blue-200 p-5 space-y-3">
-              <h3 className="font-semibold text-slate-800 flex items-center gap-2">
-                <Droplets size={18} className="text-blue-600" /> Resultado
+            <div className="bg-secondary rounded-xl border border-border p-5 space-y-3">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Droplets size={18} className="text-primary" /> Resultado
               </h3>
               <div className="grid grid-cols-2 gap-3">
-                <div className="bg-white rounded-lg p-3 text-center border border-slate-100">
-                  <p className="text-2xl font-bold text-blue-600">{result.productMl} ml</p>
-                  <p className="text-xs text-slate-500 mt-0.5">de produto</p>
+                <div className="bg-card rounded-lg p-3 text-center border border-border">
+                  <p className="text-2xl font-bold text-primary">{result.productMl} ml</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">de produto</p>
                 </div>
-                <div className="bg-white rounded-lg p-3 text-center border border-slate-100">
-                  <p className="text-2xl font-bold text-slate-700">{result.totalMl} ml</p>
-                  <p className="text-xs text-slate-500 mt-0.5">solução total</p>
+                <div className="bg-card rounded-lg p-3 text-center border border-border">
+                  <p className="text-2xl font-bold text-foreground">{result.totalMl} ml</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">solução total</p>
                 </div>
               </div>
               {selectedProduct && selectedProduct.current_stock_ml != null && (
-                <div className={`text-xs px-3 py-2 rounded-lg ${selectedProduct.current_stock_ml >= result.productMl ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"}`}>
+                <div className={`text-xs px-3 py-2 rounded-lg ${selectedProduct.current_stock_ml >= result.productMl ? "bg-emerald-50 text-emerald-700" : "bg-destructive/10 text-destructive"}`}>
                   {selectedProduct.current_stock_ml >= result.productMl
                     ? `✓ Estoque suficiente (${(selectedProduct.current_stock_ml / 1000).toFixed(1)}L disponível)`
                     : `✗ Estoque insuficiente (${(selectedProduct.current_stock_ml / 1000).toFixed(1)}L disponível)`}
