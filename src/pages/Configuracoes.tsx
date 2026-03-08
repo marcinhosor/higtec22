@@ -91,6 +91,7 @@ const ColorSwatch = ({ color, label }: { color: string; label: string }) => (
 
 const Configuracoes = () => {
   const { companyId, signOut } = useAuth();
+  const navigate = useNavigate();
   const { planTier } = useCompanyPlan();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
