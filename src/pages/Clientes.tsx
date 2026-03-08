@@ -141,18 +141,24 @@ const Clientes = () => {
     return parts.join(", ") || null;
   };
 
-  const Field = ({ label, value, onChange, placeholder, type = "text", className = "" }: any) => (
-    <div className={className}>
-      <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-      />
-    </div>
-  );
+  const importContact = async () => {
+    try {
+      if (!("contacts" in navigator)) {
+        toast.error("Importação de contatos não suportada neste navegador");
+        return;
+      }
+      const contacts = await (navigator as any).contacts.select(["name", "tel"], { multiple: false });
+      if (contacts?.length) {
+        const c = contacts[0];
+        const name = capitalize((c.name?.[0] || "").trim());
+        const phone = cleanPhone(c.tel?.[0] || "");
+        setForm(f => ({ ...f, name: name || f.name, phone: phone || f.phone }));
+        toast.success("Contato importado!");
+      }
+    } catch {
+      toast.info("Importação cancelada");
+    }
+  };
 
   return (
     <div>
