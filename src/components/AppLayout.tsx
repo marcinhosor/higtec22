@@ -25,7 +25,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const isHome = location.pathname === "/";
 
   return (
-    <div className="min-h-screen bg-[#f0f5fa] flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Top Header */}
       {!isHome && (
         <header className="bg-white border-b border-slate-100 px-4 py-3 flex items-center justify-between sticky top-0 z-30 shadow-sm">
