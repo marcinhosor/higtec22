@@ -211,19 +211,50 @@ const Configuracoes = () => {
 
       {/* 2. Plano da Conta */}
       <SectionCard className="p-6">
-        <SectionHeader icon={Shield} title="Plano da Conta" subtitle="Gerencie sua assinatura e benefícios" />
-        <div className="flex items-center gap-4 p-4 rounded-xl bg-gradient-to-r from-slate-50 to-sky-50/50 border border-slate-100 mb-4">
-          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${planColors[planTier]}`}>
-            <PlanIcon size={22} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <PlanBadge tier={planTier} size="md" />
-            </div>
-            <p className="text-xs text-slate-400">{currentPlan.price} • {currentPlan.features[0]}</p>
-          </div>
+        <SectionHeader icon={Shield} title="Plano da Conta" subtitle="Escolha o melhor plano para sua empresa" />
+
+        {/* Plan selector cards */}
+        <div className="space-y-3 mb-4">
+          {(["free", "pro", "premium"] as const).map((tier) => {
+            const plan = PLAN_FEATURES[tier];
+            const isCurrent = planTier === tier;
+            const tierIcons = { free: Star, pro: Zap, premium: Crown };
+            const TierIcon = tierIcons[tier];
+            const tierBg = { free: "bg-slate-100", pro: "bg-sky-100", premium: "bg-amber-100" };
+            const tierText = { free: "text-slate-600", pro: "text-sky-600", premium: "text-amber-600" };
+
+            return (
+              <button
+                key={tier}
+                onClick={() => !isCurrent && navigate("/checkout")}
+                className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all ${
+                  isCurrent
+                    ? "border-sky-400 bg-sky-50/60 shadow-md ring-1 ring-sky-200"
+                    : "border-slate-100 hover:border-slate-200 hover:shadow-sm"
+                }`}
+              >
+                <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${tierBg[tier]}`}>
+                  <TierIcon size={20} className={tierText[tier]} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-slate-700">{plan.label}</span>
+                    {isCurrent && (
+                      <span className="px-2 py-0.5 rounded-full bg-sky-500 text-white text-[10px] font-bold">ATUAL</span>
+                    )}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-0.5">{plan.price} • {plan.features[0]}</p>
+                </div>
+                {!isCurrent && (
+                  <ChevronRight size={16} className="text-slate-300 flex-shrink-0" />
+                )}
+              </button>
+            );
+          })}
         </div>
-        <div className="grid grid-cols-2 gap-2 mb-4">
+
+        {/* Current plan features */}
+        <div className="grid grid-cols-2 gap-2">
           {currentPlan.features.slice(0, 4).map((f) => (
             <div key={f} className="flex items-start gap-1.5 text-xs text-slate-500 p-2 rounded-lg bg-slate-50">
               <Check size={12} className="text-sky-500 mt-0.5 flex-shrink-0" />
@@ -231,16 +262,6 @@ const Configuracoes = () => {
             </div>
           ))}
         </div>
-        <Link
-          to="/checkout"
-          className="flex items-center justify-between w-full p-3.5 rounded-xl border border-sky-100 bg-sky-50/50 hover:bg-sky-50 transition group"
-        >
-          <div className="flex items-center gap-2">
-            <Crown size={16} className="text-sky-500" />
-            <span className="text-sm font-medium text-sky-700">Ver todos os planos</span>
-          </div>
-          <ChevronRight size={16} className="text-sky-400 group-hover:translate-x-0.5 transition-transform" />
-        </Link>
       </SectionCard>
 
       {/* ===== SEÇÃO 3: PALETA ATUAL ===== */}
