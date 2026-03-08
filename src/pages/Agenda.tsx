@@ -5,28 +5,18 @@ import { toast } from "sonner";
 import { format, addDays, subDays, isToday } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
-import {
-  Plus, ChevronLeft, ChevronRight, Clock, User, Phone,
-  MapPin, X, Check, Calendar as CalIcon, Edit2, Trash2, Play, Navigation
-} from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, Clock, User, MapPin, X, Check, Calendar as CalIcon, Edit2, Trash2, Play, Navigation } from "lucide-react";
 
-interface Appointment {
-  id: string; client_name: string; client_id: string;
-  date: string; time: string; service: string | null;
-  status: string | null; notes: string | null;
-  collaborator_name: string | null; collaborator_id: string | null;
-  company_id: string;
-}
+interface Appointment { id: string; client_name: string; client_id: string; date: string; time: string; service: string | null; status: string | null; notes: string | null; collaborator_name: string | null; collaborator_id: string | null; company_id: string; }
 interface Client { id: string; name: string; phone: string | null; street: string | null; number: string | null; neighborhood: string | null; city: string | null; }
 interface Collaborator { id: string; name: string; }
 interface ServiceType { id: string; name: string; }
 
-const STATUS_ORDER = ["pending", "confirmed", "completed", "cancelled"];
-const statusConfig: Record<string, { label: string; color: string; border: string }> = {
-  pending:   { label: "Agendado",   color: "bg-amber-50 text-amber-700 border-amber-200",  border: "border-l-amber-400" },
-  confirmed: { label: "Confirmado", color: "bg-emerald-50 text-emerald-700 border-emerald-200", border: "border-l-emerald-500" },
-  completed: { label: "Concluído",  color: "bg-slate-100 text-slate-500 border-slate-200",  border: "border-l-slate-400" },
-  cancelled: { label: "Cancelado",  color: "bg-red-50 text-red-600 border-red-200",      border: "border-l-red-400" },
+const statusConfig: Record<string, { label: string; bg: string; text: string }> = {
+  pending: { label: "Agendado", bg: "bg-primary/10", text: "text-primary" },
+  confirmed: { label: "Confirmado", bg: "bg-emerald-50", text: "text-emerald-700" },
+  completed: { label: "Concluído", bg: "bg-muted", text: "text-muted-foreground" },
+  cancelled: { label: "Cancelado", bg: "bg-destructive/10", text: "text-destructive" },
 };
 
 const Agenda = () => {
@@ -88,8 +78,8 @@ const Agenda = () => {
     let error;
     if (editingId) ({ error } = await supabase.from("appointments").update(payload).eq("id", editingId));
     else ({ error } = await supabase.from("appointments").insert(payload));
-    if (error) toast.error("Erro ao salvar agendamento");
-    else { toast.success(editingId ? "Agendamento atualizado!" : "Agendamento criado!"); setShowForm(false); resetForm(); loadAppointments(); }
+    if (error) toast.error("Erro ao salvar");
+    else { toast.success(editingId ? "Atualizado!" : "Criado!"); setShowForm(false); resetForm(); loadAppointments(); }
     setSaving(false);
   };
 
@@ -97,12 +87,12 @@ const Agenda = () => {
     if (!confirm("Excluir este agendamento?")) return;
     const { error } = await supabase.from("appointments").delete().eq("id", id);
     if (error) toast.error("Erro ao excluir");
-    else { toast.success("Agendamento excluído"); loadAppointments(); }
+    else { toast.success("Excluído"); loadAppointments(); }
   };
 
   const updateStatus = async (id: string, status: string) => {
     const { error } = await supabase.from("appointments").update({ status }).eq("id", id);
-    if (error) toast.error("Erro ao atualizar status");
+    if (error) toast.error("Erro");
     else { toast.success("Status atualizado"); loadAppointments(); }
   };
 
@@ -114,68 +104,34 @@ const Agenda = () => {
     window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(addr)}`, "_blank");
   };
 
-  // Group by status for summary
-  const countByStatus = (s: string) => appointments.filter(a => (a.status || "pending") === s).length;
-
   return (
     <div className="space-y-4">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-xl font-bold text-slate-800">Agenda</h2>
-          <p className="text-sm text-slate-400">{appointments.length} agendamento{appointments.length !== 1 ? "s" : ""}</p>
-        </div>
-        <button onClick={openNew} className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-sky-400 to-sky-500 hover:from-sky-500 hover:to-sky-600 text-white rounded-full text-sm font-semibold transition shadow-sm">
-          <Plus size={16} /> Novo
-        </button>
-      </div>
-
       {/* Date navigator */}
-      <div className="flex items-center gap-2 bg-white rounded-xl border border-slate-200 p-2.5">
-        <button onClick={() => setSelectedDate(subDays(selectedDate, 1))} className="p-2 hover:bg-slate-100 rounded-lg transition">
-          <ChevronLeft size={18} className="text-slate-500" />
+      <div className="flex items-center gap-2 bg-card rounded-xl border border-border p-2.5">
+        <button onClick={() => setSelectedDate(subDays(selectedDate, 1))} className="p-2 hover:bg-secondary rounded-lg transition">
+          <ChevronLeft size={18} className="text-muted-foreground" />
         </button>
         <button onClick={() => setSelectedDate(new Date())}
-          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${isToday(selectedDate) ? "bg-sky-500 text-white shadow" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}>
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${isToday(selectedDate) ? "bg-primary text-primary-foreground shadow" : "bg-secondary text-foreground hover:bg-muted"}`}>
           Hoje
         </button>
         <div className="flex-1 text-center">
-          <p className="font-semibold text-slate-800 text-sm capitalize">
-            {format(selectedDate, "EEEE", { locale: ptBR })}
-          </p>
-          <p className="text-xs text-slate-400">
-            {format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
-          </p>
+          <p className="font-semibold text-foreground text-sm capitalize">{format(selectedDate, "EEEE", { locale: ptBR })}</p>
+          <p className="text-xs text-muted-foreground">{format(selectedDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}</p>
         </div>
-        <button onClick={() => setSelectedDate(addDays(selectedDate, 1))} className="p-2 hover:bg-slate-100 rounded-lg transition">
-          <ChevronRight size={18} className="text-slate-500" />
+        <button onClick={() => setSelectedDate(addDays(selectedDate, 1))} className="p-2 hover:bg-secondary rounded-lg transition">
+          <ChevronRight size={18} className="text-muted-foreground" />
         </button>
       </div>
 
-      {/* Status summary pills */}
-      {appointments.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
-          {STATUS_ORDER.map(s => {
-            const count = countByStatus(s);
-            if (count === 0) return null;
-            const cfg = statusConfig[s];
-            return (
-              <span key={s} className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border ${cfg.color}`}>
-                {cfg.label} <span className="font-bold">{count}</span>
-              </span>
-            );
-          })}
-        </div>
-      )}
-
       {/* Appointments */}
       {loading ? (
-        <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-500" /></div>
+        <div className="flex justify-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
       ) : appointments.length === 0 ? (
-        <div className="text-center py-16 bg-white rounded-xl border border-slate-200">
-          <CalIcon className="mx-auto text-slate-300 mb-3" size={40} />
-          <p className="text-slate-500 font-medium">Nenhum agendamento para este dia</p>
-          <button onClick={openNew} className="mt-3 text-sm text-sky-600 hover:text-sky-500 font-medium">+ Criar agendamento</button>
+        <div className="text-center py-16 bg-card rounded-xl border border-border">
+          <CalIcon className="mx-auto text-muted-foreground/30 mb-3" size={40} />
+          <p className="text-muted-foreground font-medium">Nenhum agendamento para este dia</p>
+          <button onClick={openNew} className="mt-3 text-sm text-primary hover:text-primary/80 font-medium">+ Criar agendamento</button>
         </div>
       ) : (
         <div className="space-y-3">
@@ -186,84 +142,43 @@ const Agenda = () => {
             const isActive = status === "pending" || status === "confirmed";
 
             return (
-              <div key={apt.id} className={`bg-white rounded-xl border border-slate-100 border-l-4 ${st.border} shadow-sm overflow-hidden ${!isActive ? "opacity-70" : ""}`}>
-                {/* Main info */}
-                <div className="p-4">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-semibold border ${st.color}`}>{st.label}</span>
-                        <span className="flex items-center gap-1 text-xs text-slate-500">
-                          <Clock size={11} /> {apt.time}
-                        </span>
-                      </div>
-                      <h3 className="font-bold text-slate-800 text-[15px] truncate">{apt.client_name}</h3>
-                      {apt.service && (
-                        <p className="text-xs text-slate-500 mt-0.5">{apt.service}</p>
-                      )}
-                    </div>
-                    <div className="flex items-center gap-0.5 flex-shrink-0">
-                      <button onClick={() => openEdit(apt)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-sky-600 transition" title="Editar">
-                        <Edit2 size={15} />
-                      </button>
-                      <button onClick={() => handleDelete(apt.id)} className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-300 hover:text-red-500 transition" title="Excluir">
-                        <Trash2 size={15} />
-                      </button>
-                    </div>
+              <div key={apt.id} className="bg-card rounded-xl border-l-4 border-l-primary border border-border shadow-sm p-4">
+                {/* Top row: name + actions */}
+                <div className="flex items-start justify-between mb-1">
+                  <div>
+                    <h3 className="font-bold text-foreground text-base">{apt.client_name}</h3>
+                    <p className="text-sm text-muted-foreground">{format(new Date(apt.date + "T00:00"), "dd/MM/yyyy")} às {apt.time}</p>
                   </div>
-
-                  {/* Meta info */}
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
-                    {apt.collaborator_name && (
-                      <span className="flex items-center gap-1"><User size={11} /> {apt.collaborator_name}</span>
-                    )}
-                    {client?.phone && (
-                      <a href={`tel:${client.phone}`} className="flex items-center gap-1 hover:text-sky-600 transition">
-                        <Phone size={11} /> {client.phone}
-                      </a>
-                    )}
-                    {client?.neighborhood && (
-                      <span className="flex items-center gap-1"><MapPin size={11} /> {client.neighborhood}</span>
-                    )}
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => openEdit(apt)} className="p-1.5 hover:bg-secondary rounded-lg text-muted-foreground hover:text-primary transition"><Edit2 size={16} /></button>
+                    <button onClick={() => isActive && updateStatus(apt.id, status === "pending" ? "confirmed" : "completed")} className="p-1.5 hover:bg-secondary rounded-lg text-muted-foreground hover:text-emerald-600 transition"><Check size={16} /></button>
+                    <button onClick={() => handleDelete(apt.id)} className="p-1.5 hover:bg-secondary rounded-lg text-muted-foreground hover:text-destructive transition"><Trash2 size={16} /></button>
                   </div>
-
-                  {apt.notes && (
-                    <p className="text-xs text-slate-400 italic mt-2 border-t border-slate-50 pt-2">"{apt.notes}"</p>
-                  )}
                 </div>
 
-                {/* Action bar */}
+                {/* Service badge */}
+                {apt.service && (
+                  <span className="inline-block px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-semibold mb-3">{apt.service}</span>
+                )}
+
+                {/* Action buttons */}
                 {isActive && (
-                  <div className="flex border-t border-slate-100 divide-x divide-slate-100">
-                    <button
-                      onClick={() => navigate(`/execucao?appointmentId=${apt.id}`)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-semibold text-sky-600 hover:bg-sky-50 transition"
-                    >
-                      <Play size={12} /> Iniciar
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <button onClick={() => navigate(`/execucao?appointmentId=${apt.id}`)} className="flex items-center gap-1.5 px-4 py-2 bg-primary text-primary-foreground rounded-full text-xs font-semibold hover:bg-primary/90 transition shadow-sm">
+                      <Play size={12} /> Iniciar Serviço
                     </button>
-                    <button
-                      onClick={() => openRoute(client)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-500 hover:bg-slate-50 transition"
-                    >
-                      <Navigation size={12} /> Rota
+                    <button onClick={() => openRoute(client)} className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border text-foreground rounded-full text-xs font-medium hover:bg-secondary transition">
+                      <MapPin size={12} /> Rota
                     </button>
-                    {status === "pending" && (
-                      <button
-                        onClick={() => updateStatus(apt.id, "confirmed")}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 transition"
-                      >
-                        <Check size={12} /> Confirmar
-                      </button>
-                    )}
-                    {status === "confirmed" && (
-                      <button
-                        onClick={() => updateStatus(apt.id, "completed")}
-                        className="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 transition"
-                      >
-                        <Check size={12} /> Concluir
-                      </button>
-                    )}
+                    <button onClick={() => { if (client) openEdit(apt); }} className="flex items-center gap-1.5 px-4 py-2 bg-card border border-border text-foreground rounded-full text-xs font-medium hover:bg-secondary transition">
+                      <User size={12} /> Editar Cliente
+                    </button>
+                    <span className={`inline-flex items-center px-3 py-2 rounded-full text-xs font-semibold ${st.bg} ${st.text}`}>{st.label}</span>
                   </div>
+                )}
+
+                {!isActive && (
+                  <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold mt-2 ${st.bg} ${st.text}`}>{st.label}</span>
                 )}
               </div>
             );
@@ -274,48 +189,47 @@ const Agenda = () => {
       {/* Modal Form */}
       {showForm && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-5 border-b border-slate-100">
-              <h3 className="text-lg font-semibold text-slate-800">{editingId ? "Editar Agendamento" : "Novo Agendamento"}</h3>
-              <button onClick={() => { setShowForm(false); resetForm(); }} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
+          <div className="bg-card rounded-t-2xl sm:rounded-2xl w-full sm:max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-5 border-b border-border">
+              <h3 className="text-lg font-semibold text-foreground">{editingId ? "Editar Agendamento" : "Novo Agendamento"}</h3>
+              <button onClick={() => { setShowForm(false); resetForm(); }} className="text-muted-foreground hover:text-foreground"><X size={20} /></button>
             </div>
             <div className="p-5 space-y-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Cliente *</label>
-                <select value={formClientId} onChange={(e) => setFormClientId(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                <label className="block text-sm font-medium text-foreground mb-1">Cliente *</label>
+                <select value={formClientId} onChange={(e) => setFormClientId(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
                   <option value="">Selecione um cliente</option>
                   {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Data *</label>
-                <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
+                <label className="block text-sm font-medium text-foreground mb-1">Data *</label>
+                <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Horário *</label>
-                  <input type="time" value={formTime} onChange={(e) => setFormTime(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
+                  <label className="block text-sm font-medium text-foreground mb-1">Horário *</label>
+                  <input type="time" value={formTime} onChange={(e) => setFormTime(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Serviço</label>
-                  <select value={formService} onChange={(e) => setFormService(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                  <label className="block text-sm font-medium text-foreground mb-1">Serviço</label>
+                  <select value={formService} onChange={(e) => setFormService(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
                     <option value="">Selecione</option>
                     {serviceTypes.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}
                   </select>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Técnico</label>
-                <select value={formCollaboratorId} onChange={(e) => setFormCollaboratorId(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                <label className="block text-sm font-medium text-foreground mb-1">Técnico</label>
+                <select value={formCollaboratorId} onChange={(e) => setFormCollaboratorId(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
                   <option value="">Nenhum</option>
                   {collaborators.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
               </div>
               {editingId && (
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Status</label>
-                  <select value={formStatus} onChange={(e) => setFormStatus(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400">
+                  <label className="block text-sm font-medium text-foreground mb-1">Status</label>
+                  <select value={formStatus} onChange={(e) => setFormStatus(e.target.value)} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring">
                     <option value="pending">Agendado</option>
                     <option value="confirmed">Confirmado</option>
                     <option value="completed">Concluído</option>
@@ -324,13 +238,13 @@ const Agenda = () => {
                 </div>
               )}
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1">Observações</label>
-                <textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3} className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400 resize-none" placeholder="Observações..." />
+                <label className="block text-sm font-medium text-foreground mb-1">Observações</label>
+                <textarea value={formNotes} onChange={(e) => setFormNotes(e.target.value)} rows={3} className="w-full px-3 py-2.5 rounded-lg border border-border text-sm bg-card focus:outline-none focus:ring-2 focus:ring-ring resize-none" placeholder="Observações..." />
               </div>
             </div>
-            <div className="p-5 border-t border-slate-100 flex gap-3 justify-end">
-              <button onClick={() => { setShowForm(false); resetForm(); }} className="px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition">Cancelar</button>
-              <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 text-sm font-medium bg-sky-500 hover:bg-sky-600 text-white rounded-lg disabled:opacity-50 transition shadow-sm">{saving ? "Salvando..." : editingId ? "Atualizar" : "Criar"}</button>
+            <div className="p-5 border-t border-border flex gap-3 justify-end">
+              <button onClick={() => { setShowForm(false); resetForm(); }} className="px-4 py-2.5 text-sm font-medium text-muted-foreground hover:bg-secondary rounded-lg transition">Cancelar</button>
+              <button onClick={handleSave} disabled={saving} className="px-6 py-2.5 text-sm font-medium bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg disabled:opacity-50 transition shadow-sm">{saving ? "Salvando..." : editingId ? "Atualizar" : "Criar"}</button>
             </div>
           </div>
         </div>
