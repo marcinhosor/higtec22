@@ -257,7 +257,12 @@ const Clientes = () => {
             </div>
 
             <div className="p-5 space-y-4">
-              <Field label="Nome *" value={form.name} onChange={(v: string) => setForm({ ...form, name: v })} placeholder="Nome do cliente" />
+              <div className="flex gap-2 items-end">
+                <Field label="Nome *" value={form.name} onChange={(v: string) => setForm({ ...form, name: v })} placeholder="Nome do cliente" autoCapWords className="flex-1" />
+                <button type="button" onClick={importContact} className="mb-0.5 p-2.5 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-lg transition" title="Importar da agenda">
+                  <ContactRound size={18} />
+                </button>
+              </div>
               <Field label="Telefone" value={form.phone} onChange={(v: string) => setForm({ ...form, phone: v })} placeholder="(00) 00000-0000" type="tel" />
 
               <div className="border-t border-slate-100 pt-4">
