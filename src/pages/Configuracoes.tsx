@@ -192,50 +192,145 @@ const Configuracoes = () => {
       <SectionCard className="p-6">
         <SectionHeader icon={Palette} title="Personalização Visual" subtitle="Escolha a paleta de cores do sistema e PDFs" />
 
-        <div className="space-y-2">
-          {THEMES.map((theme) => {
-            const available = canUseTheme(theme.tier);
-            const isSelected = selectedTheme === theme.id;
-            return (
-              <button
-                key={theme.id}
-                onClick={() => available && setSelectedTheme(theme.id)}
-                className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
-                  isSelected
-                    ? "border-sky-400 bg-sky-50/60 shadow-sm"
-                    : available
-                      ? "border-slate-100 hover:border-slate-200 hover:bg-slate-50/50"
-                      : "border-slate-50 opacity-40 cursor-not-allowed"
-                }`}
-              >
-                <div className="flex gap-1.5">
-                  {theme.colors.map((c, i) => (
-                    <div
-                      key={i}
-                      className="w-7 h-7 rounded-full border-2 border-white shadow-sm"
-                      style={{ backgroundColor: c }}
-                    />
-                  ))}
+        {/* Paleta Original - always visible */}
+        <div className="mb-4">
+          <div className={`p-4 rounded-xl border-2 transition-all ${
+            selectedTheme === "default"
+              ? "border-sky-400 bg-sky-50/60 shadow-sm"
+              : "border-slate-100"
+          }`}>
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm font-bold text-slate-800">Paleta Original HigTec</span>
+              {selectedTheme === "default" && (
+                <div className="w-5 h-5 bg-sky-500 rounded-full flex items-center justify-center">
+                  <Check size={12} className="text-white" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-sm font-medium text-slate-700 truncate block">
-                    {theme.emoji && `${theme.emoji} `}{theme.name}
-                  </span>
-                  {!available && (
-                    <span className="text-[10px] text-amber-500 font-medium uppercase tracking-wide">
+              )}
+            </div>
+            <div className="grid grid-cols-5 gap-2 mb-3">
+              {DEFAULT_PALETTE.colors.map((c, i) => (
+                <div key={i} className="flex flex-col items-center gap-1">
+                  <div
+                    className="w-10 h-10 rounded-xl border-2 border-white shadow-sm"
+                    style={{ backgroundColor: c.hex }}
+                  />
+                  <span className="text-[10px] text-slate-400 font-medium">{c.label}</span>
+                </div>
+              ))}
+            </div>
+            {planTier === "free" && selectedTheme !== "default" ? (
+              <button
+                onClick={() => {
+                  setSelectedTheme("default");
+                  handleSave();
+                }}
+                className="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-400 to-sky-500 text-white text-sm font-semibold transition hover:from-sky-500 hover:to-sky-600"
+              >
+                Usar paleta original
+              </button>
+            ) : planTier === "free" && selectedTheme === "default" ? (
+              <p className="text-xs text-sky-500 font-medium text-center">✓ Paleta ativa</p>
+            ) : null}
+          </div>
+        </div>
+
+        {/* Personalização de cores - locked for free */}
+        {planTier === "free" ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 mb-2">
+              <Lock size={14} className="text-slate-300" />
+              <span className="text-sm font-semibold text-slate-500">Personalização de cores</span>
+            </div>
+            <p className="text-xs text-slate-400 mb-3">
+              Personalização de cores disponível apenas nos planos Premium e Pro.
+            </p>
+
+            {/* Preview of premium themes - locked */}
+            <div className="space-y-2 opacity-50 pointer-events-none">
+              {PREMIUM_THEMES.map((theme) => (
+                <div
+                  key={theme.id}
+                  className="flex items-center gap-3 p-3 rounded-xl border border-slate-100 relative"
+                >
+                  <div className="flex gap-1.5">
+                    {theme.colors.map((c, i) => (
+                      <div
+                        key={i}
+                        className="w-6 h-6 rounded-full border-2 border-white shadow-sm"
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-medium text-slate-600 truncate block">
+                      {theme.emoji} {theme.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 border border-amber-200">
+                    <Lock size={10} className="text-amber-500" />
+                    <span className="text-[10px] text-amber-600 font-semibold uppercase">
                       {theme.tier === "pro" ? "Pro" : "Premium"}
                     </span>
-                  )}
-                </div>
-                {isSelected && (
-                  <div className="w-6 h-6 bg-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Check size={14} className="text-white" />
                   </div>
-                )}
-              </button>
-            );
-          })}
-        </div>
+                </div>
+              ))}
+            </div>
+
+            <Link
+              to="/checkout"
+              className="flex items-center justify-center gap-2 w-full py-3 mt-2 rounded-xl border border-sky-100 bg-sky-50/50 hover:bg-sky-50 transition text-sm font-medium text-sky-700"
+            >
+              <Crown size={16} className="text-sky-500" />
+              Ver planos
+            </Link>
+          </div>
+        ) : (
+          /* Pro/Premium: full theme picker */
+          <div className="space-y-2">
+            {PREMIUM_THEMES.map((theme) => {
+              const available = canUseTheme(theme.tier);
+              const isSelected = selectedTheme === theme.id;
+              return (
+                <button
+                  key={theme.id}
+                  onClick={() => available && setSelectedTheme(theme.id)}
+                  className={`w-full flex items-center gap-3 p-3.5 rounded-xl border-2 text-left transition-all ${
+                    isSelected
+                      ? "border-sky-400 bg-sky-50/60 shadow-sm"
+                      : available
+                        ? "border-slate-100 hover:border-slate-200 hover:bg-slate-50/50"
+                        : "border-slate-50 opacity-40 cursor-not-allowed"
+                  }`}
+                >
+                  <div className="flex gap-1.5">
+                    {theme.colors.map((c, i) => (
+                      <div
+                        key={i}
+                        className="w-7 h-7 rounded-full border-2 border-white shadow-sm"
+                        style={{ backgroundColor: c }}
+                      />
+                    ))}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-sm font-medium text-slate-700 truncate block">
+                      {theme.emoji} {theme.name}
+                    </span>
+                    {!available && (
+                      <span className="text-[10px] text-amber-500 font-medium uppercase tracking-wide">
+                        {theme.tier === "pro" ? "Pro" : "Premium"}
+                      </span>
+                    )}
+                  </div>
+                  {isSelected && (
+                    <div className="w-6 h-6 bg-sky-500 rounded-full flex items-center justify-center flex-shrink-0">
+                      <Check size={14} className="text-white" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        )}
       </SectionCard>
 
       {/* 4. Configurações do Sistema */}
