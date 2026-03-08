@@ -45,7 +45,7 @@ const Agenda = () => {
   const [formService, setFormService] = useState("");
   const [formCollaboratorId, setFormCollaboratorId] = useState("");
   const [formNotes, setFormNotes] = useState("");
-  const [formStatus, setFormStatus] = useState("pending");
+  const [formDate, setFormDate] = useState(dateStr);
   const [saving, setSaving] = useState(false);
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
