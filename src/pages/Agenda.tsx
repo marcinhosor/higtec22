@@ -46,6 +46,7 @@ const Agenda = () => {
   const [formCollaboratorId, setFormCollaboratorId] = useState("");
   const [formNotes, setFormNotes] = useState("");
   const [formStatus, setFormStatus] = useState("pending");
+  const [formDate, setFormDate] = useState("");
   const [saving, setSaving] = useState(false);
 
   const dateStr = format(selectedDate, "yyyy-MM-dd");
@@ -74,16 +75,16 @@ const Agenda = () => {
     setLoading(false);
   };
 
-  const resetForm = () => { setFormClientId(""); setFormTime("08:00"); setFormService(""); setFormCollaboratorId(""); setFormNotes(""); setFormStatus("pending"); setEditingId(null); };
+  const resetForm = () => { setFormClientId(""); setFormTime("08:00"); setFormService(""); setFormCollaboratorId(""); setFormNotes(""); setFormStatus("pending"); setFormDate(dateStr); setEditingId(null); };
   const openNew = () => { resetForm(); setShowForm(true); };
-  const openEdit = (apt: Appointment) => { setFormClientId(apt.client_id); setFormTime(apt.time); setFormService(apt.service || ""); setFormCollaboratorId(apt.collaborator_id || ""); setFormNotes(apt.notes || ""); setFormStatus(apt.status || "pending"); setEditingId(apt.id); setShowForm(true); };
+  const openEdit = (apt: Appointment) => { setFormClientId(apt.client_id); setFormTime(apt.time); setFormService(apt.service || ""); setFormCollaboratorId(apt.collaborator_id || ""); setFormNotes(apt.notes || ""); setFormStatus(apt.status || "pending"); setFormDate(apt.date); setEditingId(apt.id); setShowForm(true); };
 
   const handleSave = async () => {
-    if (!companyId || !formClientId || !formTime) { toast.error("Preencha cliente e horário"); return; }
+    if (!companyId || !formClientId || !formTime || !formDate) { toast.error("Preencha cliente, data e horário"); return; }
     setSaving(true);
     const client = clients.find((c) => c.id === formClientId);
     const collab = collaborators.find((c) => c.id === formCollaboratorId);
-    const payload = { company_id: companyId, client_id: formClientId, client_name: client?.name || "", date: dateStr, time: formTime, service: formService || null, collaborator_id: formCollaboratorId || null, collaborator_name: collab?.name || null, notes: formNotes || null, status: formStatus };
+    const payload = { company_id: companyId, client_id: formClientId, client_name: client?.name || "", date: formDate, time: formTime, service: formService || null, collaborator_id: formCollaboratorId || null, collaborator_name: collab?.name || null, notes: formNotes || null, status: formStatus };
     let error;
     if (editingId) ({ error } = await supabase.from("appointments").update(payload).eq("id", editingId));
     else ({ error } = await supabase.from("appointments").insert(payload));
@@ -285,6 +286,11 @@ const Agenda = () => {
                   <option value="">Selecione um cliente</option>
                   {clients.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Data *</label>
+                <input type="date" value={formDate} onChange={(e) => setFormDate(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-sky-400" />
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
