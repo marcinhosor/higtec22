@@ -3,9 +3,30 @@ import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
-  Plus, Search, X, Edit2, Trash2, Phone, MapPin, User, Eye, ChevronDown
+  Plus, Search, X, Edit2, Trash2, Phone, MapPin, User, Eye, ChevronDown, ContactRound
 } from "lucide-react";
 
+const capitalize = (s: string) =>
+  s.replace(/(^|\s)\S/g, (l) => l.toUpperCase());
+
+const cleanPhone = (raw: string) =>
+  raw.replace(/^\+55\s?/, "").replace(/[^\d]/g, "");
+
+const Field = ({ label, value, onChange, placeholder, type = "text", className = "", autoCapWords }: {
+  label: string; value: string; onChange: (v: string) => void; placeholder?: string; type?: string; className?: string; autoCapWords?: boolean;
+}) => (
+  <div className={className}>
+    <label className="block text-sm font-medium text-slate-700 mb-1">{label}</label>
+    <input
+      type={type}
+      value={value}
+      onChange={(e) => onChange(autoCapWords ? capitalize(e.target.value) : e.target.value)}
+      placeholder={placeholder}
+      autoCapitalize={autoCapWords ? "words" : undefined}
+      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+    />
+  </div>
+);
 const ESTADOS_BR = [
   "AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT",
   "PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"
