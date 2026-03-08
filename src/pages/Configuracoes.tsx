@@ -7,31 +7,49 @@ import { Save, Palette, Check, Crown, Building2, LogOut, Zap, Star, ChevronRight
 import PlanBadge from "@/components/PlanBadge";
 import { Link } from "react-router-dom";
 
-const DEFAULT_PALETTE = {
-  id: "default",
-  name: "Paleta Original HigTec",
-  emoji: "",
-  colors: [
-    { label: "Primária", hex: "#3b82f6" },
-    { label: "Secundária", hex: "#dbeafe" },
-    { label: "Destaque", hex: "#1e40af" },
-    { label: "Fundo", hex: "#eff6ff" },
-    { label: "Texto", hex: "#1e293b" },
-  ],
-  tier: "free" as const,
-};
-
-const PREMIUM_THEMES = [
-  { id: "luxury", name: "Signature Luxo Premium", emoji: "💎", colors: ["#1a1a2e", "#d4af37", "#c87533", "#f5f0e1"], tier: "pro" as const },
-  { id: "royal", name: "Royal Blue Elite", emoji: "💠", colors: ["#0a1929", "#1e3a5f", "#2563eb", "#e8f0fe"], tier: "pro" as const },
-  { id: "aqua", name: "Aqua Clean Pro", emoji: "🌊", colors: ["#0891b2", "#06b6d4", "#0e7490", "#ecfeff"], tier: "pro" as const },
-  { id: "emerald", name: "Emerald Executive", emoji: "🟢", colors: ["#064e3b", "#059669", "#10b981", "#ecfdf5"], tier: "premium" as const },
-  { id: "titanium", name: "Titanium Dark", emoji: "🔥", colors: ["#1e293b", "#475569", "#64748b", "#0f172a"], tier: "premium" as const },
-];
-
-const THEMES = [
-  { id: DEFAULT_PALETTE.id, name: DEFAULT_PALETTE.name, emoji: DEFAULT_PALETTE.emoji, colors: DEFAULT_PALETTE.colors.map(c => c.hex), tier: DEFAULT_PALETTE.tier },
-  ...PREMIUM_THEMES,
+const PALETTE_PRESETS = [
+  {
+    id: "default",
+    name: "HigTec Blue",
+    subtitle: "Padrão do sistema",
+    colors: { primary: "#3b82f6", secondary: "#dbeafe", accent: "#1e40af", background: "#eff6ff" },
+    tier: "free" as const,
+  },
+  {
+    id: "royal",
+    name: "Royal Blue Elite",
+    subtitle: "Azul profissional",
+    colors: { primary: "#1e3a5f", secondary: "#e8f0fe", accent: "#2563eb", background: "#f0f4f8" },
+    tier: "pro" as const,
+  },
+  {
+    id: "aqua",
+    name: "Aqua Clean Pro",
+    subtitle: "Ciano moderno",
+    colors: { primary: "#0891b2", secondary: "#ecfeff", accent: "#0e7490", background: "#f0fdfa" },
+    tier: "pro" as const,
+  },
+  {
+    id: "graphite",
+    name: "Graphite Tech",
+    subtitle: "Cinza sofisticado",
+    colors: { primary: "#475569", secondary: "#f1f5f9", accent: "#334155", background: "#f8fafc" },
+    tier: "pro" as const,
+  },
+  {
+    id: "emerald",
+    name: "Emerald Professional",
+    subtitle: "Verde executivo",
+    colors: { primary: "#059669", secondary: "#ecfdf5", accent: "#064e3b", background: "#f0fdf4" },
+    tier: "premium" as const,
+  },
+  {
+    id: "luxury",
+    name: "Signature Luxo",
+    subtitle: "Preto e dourado",
+    colors: { primary: "#1a1a2e", secondary: "#f5f0e1", accent: "#d4af37", background: "#faf9f6" },
+    tier: "premium" as const,
+  },
 ];
 
 const SectionCard = ({ children, className = "" }: { children: React.ReactNode; className?: string }) => (
