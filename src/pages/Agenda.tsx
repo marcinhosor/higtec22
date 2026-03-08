@@ -2,9 +2,12 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { format, addDays, subDays, isToday } from "date-fns";
+import { format, addDays, subDays, isToday, parse } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   Plus, ChevronLeft, ChevronRight, Clock, User, Phone,
   MapPin, X, Check, Calendar as CalIcon, Edit2, Trash2, Play, Navigation
