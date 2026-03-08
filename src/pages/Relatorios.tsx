@@ -301,6 +301,60 @@ const Relatorios = () => {
                   </div>
                 )}
 
+                {/* Consumo real por serviço executado */}
+                {(() => {
+                  const consumptionMap: Record<string, { name: string; totalMl: number; count: number }> = {};
+                  executions.forEach(ex => {
+                    const used = (ex.products_used as any[]) || [];
+                    used.forEach((pu: any) => {
+                      const pName = pu.name || pu.product_name || "Sem nome";
+                      const ml = Number(pu.quantity_ml || pu.amount_ml || pu.quantity || 0);
+                      if (!consumptionMap[pName]) consumptionMap[pName] = { name: pName, totalMl: 0, count: 0 };
+                      consumptionMap[pName].totalMl += ml;
+                      consumptionMap[pName].count++;
+                    });
+                  });
+                  const sorted = Object.values(consumptionMap).sort((a, b) => b.totalMl - a.totalMl);
+                  const chartData = sorted.slice(0, 8).map(p => ({ name: p.name.length > 14 ? p.name.slice(0, 14) + "…" : p.name, ml: p.totalMl }));
+                  return (
+                    <>
+                      <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+                        <h3 className="font-semibold text-slate-700 text-sm mb-3 flex items-center gap-1.5">
+                          <FlaskConical size={14} /> Consumo Real por Serviço Executado
+                        </h3>
+                        {sorted.length === 0 ? (
+                          <p className="text-sm text-slate-400">Nenhum consumo registrado no período.</p>
+                        ) : (
+                          <div className="space-y-2">
+                            {sorted.map((p, i) => (
+                              <div key={i} className="flex justify-between items-center text-sm">
+                                <span className="text-slate-700 truncate flex-1">{p.name}</span>
+                                <span className="text-slate-500 mx-2">{p.count}x usado</span>
+                                <span className="font-semibold text-slate-800">{(p.totalMl / 1000).toFixed(2)}L</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+
+                      {chartData.length > 0 && (
+                        <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
+                          <h3 className="font-semibold text-slate-700 text-sm mb-3">Consumo por Produto (ml)</h3>
+                          <ResponsiveContainer width="100%" height={220}>
+                            <BarChart data={chartData}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+                              <YAxis tick={{ fontSize: 10 }} />
+                              <Tooltip formatter={(v: number) => `${v} ml`} />
+                              <Bar dataKey="ml" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </div>
+                      )}
+                    </>
+                  );
+                })()}
+
                 <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
                   <h3 className="font-semibold text-slate-700 text-sm mb-3">Produtos por Custo</h3>
                   {products.length === 0 ? (
