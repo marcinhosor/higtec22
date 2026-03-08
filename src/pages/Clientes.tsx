@@ -268,15 +268,15 @@ const Clientes = () => {
               <div className="border-t border-slate-100 pt-4">
                 <p className="text-sm font-medium text-slate-600 mb-3">Endereço</p>
                 <div className="grid grid-cols-3 gap-3">
-                  <Field label="Rua" value={form.street} onChange={(v: string) => setForm({ ...form, street: v })} placeholder="Rua" className="col-span-2" />
+                  <Field label="Rua" value={form.street} onChange={(v: string) => setForm({ ...form, street: v })} placeholder="Rua" className="col-span-2" autoCapWords />
                   <Field label="Número" value={form.number} onChange={(v: string) => setForm({ ...form, number: v })} placeholder="Nº" />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  <Field label="Complemento" value={form.complement} onChange={(v: string) => setForm({ ...form, complement: v })} placeholder="Apto, bloco..." />
-                  <Field label="Bairro" value={form.neighborhood} onChange={(v: string) => setForm({ ...form, neighborhood: v })} placeholder="Bairro" />
+                  <Field label="Complemento" value={form.complement} onChange={(v: string) => setForm({ ...form, complement: v })} placeholder="Apto, bloco..." autoCapWords />
+                  <Field label="Bairro" value={form.neighborhood} onChange={(v: string) => setForm({ ...form, neighborhood: v })} placeholder="Bairro" autoCapWords />
                 </div>
                 <div className="grid grid-cols-2 gap-3 mt-3">
-                  <Field label="Cidade" value={form.city} onChange={(v: string) => setForm({ ...form, city: v })} placeholder="Cidade" />
+                  <Field label="Cidade" value={form.city} onChange={(v: string) => setForm({ ...form, city: v })} placeholder="Cidade" autoCapWords />
                   <div>
                     <label className="block text-sm font-medium text-slate-700 mb-1">Estado</label>
                     <select
