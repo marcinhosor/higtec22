@@ -45,6 +45,27 @@ const Dashboard = () => {
         </div>
       </div>
 
+      {/* Onboarding Checklist */}
+      <div className="bg-gradient-to-br from-primary to-primary/80 rounded-2xl p-5 text-white shadow-lg">
+        <h2 className="text-lg font-bold flex items-center gap-2 mb-3">
+          🚀 Bem-vindo! Configure sua empresa para começar.
+        </h2>
+        <div className="space-y-3">
+          <Link to="/configuracoes" className="flex items-center justify-between bg-white/10 hover:bg-white/20 p-3 rounded-xl transition group">
+            <span className="text-sm font-medium">Cadastrar empresa</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link to="/agenda" className="flex items-center justify-between bg-white/10 hover:bg-white/20 p-3 rounded-xl transition group">
+            <span className="text-sm font-medium">Cadastrar primeiro serviço</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+          <Link to="/produtos" className="flex items-center justify-between bg-white/10 hover:bg-white/20 p-3 rounded-xl transition group">
+            <span className="text-sm font-medium">Cadastrar primeiro produto</span>
+            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+          </Link>
+        </div>
+      </div>
+
       {/* Usage alerts */}
       <LimitAlert current={usage.clientCount} max={limits.maxClients} label="clientes" />
       <LimitAlert current={usage.quotesThisMonth} max={limits.maxQuotesPerMonth} label="orçamentos este mês" />
