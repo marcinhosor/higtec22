@@ -35,8 +35,8 @@ const Signup = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f0f5fa] px-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="bg-card rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
             <span className="text-3xl">✉️</span>
           </div>
@@ -53,9 +53,9 @@ const Signup = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f0f5fa] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-card rounded-2xl shadow-xl p-8">
           <div className="text-center mb-6">
             <h1 className="text-3xl font-black text-slate-800 tracking-tight">
               Hig<span className="text-sky-500">Tec</span>

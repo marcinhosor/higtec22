@@ -29,8 +29,8 @@ const ResetPassword = () => {
 
   if (!isRecovery) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#f0f5fa] px-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+      <div className="min-h-screen flex items-center justify-center bg-background px-4">
+        <div className="bg-card rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           <p className="text-slate-500">Link de recuperação inválido ou expirado.</p>
           <button onClick={() => navigate("/login")} className="mt-4 text-sky-500 hover:text-sky-600 font-semibold transition text-sm">
             Voltar ao login
@@ -41,9 +41,9 @@ const ResetPassword = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#f0f5fa] px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background px-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-card rounded-2xl shadow-xl p-8">
           <div className="text-center mb-6">
             <div className="w-14 h-14 bg-sky-50 rounded-full flex items-center justify-center mx-auto mb-3">
               <Lock className="text-sky-500" size={24} />
