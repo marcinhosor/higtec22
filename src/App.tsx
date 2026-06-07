@@ -1,4 +1,3 @@
-import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Toaster } from "sonner";
@@ -9,27 +8,27 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import AppLayout from "@/components/AppLayout";
 import InstallAppBanner from "@/components/InstallAppBanner";
 
-// Lazy-loaded pages
-const Login = lazy(() => import("@/pages/Login"));
-const Signup = lazy(() => import("@/pages/Signup"));
-const ForgotPassword = lazy(() => import("@/pages/ForgotPassword"));
-const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
-const Dashboard = lazy(() => import("@/pages/Dashboard"));
-const Agenda = lazy(() => import("@/pages/Agenda"));
-const Clientes = lazy(() => import("@/pages/Clientes"));
-const Orcamentos = lazy(() => import("@/pages/Orcamentos"));
-const Produtos = lazy(() => import("@/pages/Produtos"));
-const Calculadora = lazy(() => import("@/pages/Calculadora"));
-const Relatorios = lazy(() => import("@/pages/Relatorios"));
-const Configuracoes = lazy(() => import("@/pages/Configuracoes"));
-const Execucao = lazy(() => import("@/pages/Execucao"));
-const Checkout = lazy(() => import("@/pages/Checkout"));
-const Painel = lazy(() => import("@/pages/Painel"));
-const Equipamentos = lazy(() => import("@/pages/Equipamentos"));
-const Marketplace = lazy(() => import("@/pages/Marketplace"));
-const Deslocamentos = lazy(() => import("@/pages/Deslocamentos"));
-const PainelAdmin = lazy(() => import("@/pages/PainelAdmin"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
+// Regular imports
+import Login from "@/pages/Login";
+import Signup from "@/pages/Signup";
+import ForgotPassword from "@/pages/ForgotPassword";
+import ResetPassword from "@/pages/ResetPassword";
+import Dashboard from "@/pages/Dashboard";
+import Agenda from "@/pages/Agenda";
+import Clientes from "@/pages/Clientes";
+import Orcamentos from "@/pages/Orcamentos";
+import Produtos from "@/pages/Produtos";
+import Calculadora from "@/pages/Calculadora";
+import Relatorios from "@/pages/Relatorios";
+import Configuracoes from "@/pages/Configuracoes";
+import Execucao from "@/pages/Execucao";
+import Checkout from "@/pages/Checkout";
+import Painel from "@/pages/Painel";
+import Equipamentos from "@/pages/Equipamentos";
+import Marketplace from "@/pages/Marketplace";
+import Deslocamentos from "@/pages/Deslocamentos";
+import PainelAdmin from "@/pages/PainelAdmin";
+import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
 
@@ -56,36 +55,34 @@ const App = () => (
         <TechnicianProvider>
           <AuthProvider>
             <InstallAppBanner />
-            <Suspense fallback={<Loading />}>
-              <Routes>
-                {/* Public routes */}
-                <Route path="/login" element={<Login />} />
-                <Route path="/cadastro" element={<Signup />} />
-                <Route path="/esqueci-senha" element={<ForgotPassword />} />
-                <Route path="/reset-password" element={<ResetPassword />} />
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/cadastro" element={<Signup />} />
+              <Route path="/esqueci-senha" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
 
-                {/* Protected routes */}
-                <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
-                <Route path="/agenda" element={<ProtectedPage><Agenda /></ProtectedPage>} />
-                <Route path="/clientes" element={<ProtectedPage><Clientes /></ProtectedPage>} />
-                <Route path="/orcamentos" element={<ProtectedPage><Orcamentos /></ProtectedPage>} />
-                <Route path="/produtos" element={<ProtectedPage><Produtos /></ProtectedPage>} />
-                <Route path="/calculadora" element={<ProtectedPage><Calculadora /></ProtectedPage>} />
-                <Route path="/relatorios" element={<ProtectedPage><Relatorios /></ProtectedPage>} />
-                <Route path="/configuracoes" element={<ProtectedPage><Configuracoes /></ProtectedPage>} />
-                <Route path="/execucao" element={<ProtectedPage><Execucao /></ProtectedPage>} />
-                <Route path="/checkout" element={<ProtectedPage><Checkout /></ProtectedPage>} />
-                <Route path="/painel" element={<ProtectedPage><Painel /></ProtectedPage>} />
-                <Route path="/equipamentos" element={<ProtectedPage><Equipamentos /></ProtectedPage>} />
-                <Route path="/marketplace" element={<ProtectedPage><Marketplace /></ProtectedPage>} />
-                <Route path="/deslocamentos" element={<ProtectedPage><Deslocamentos /></ProtectedPage>} />
-                <Route path="/x9k2m" element={<ProtectedPage><PainelAdmin /></ProtectedPage>} />
-                <Route path="/painel-admin" element={<ProtectedPage><PainelAdmin /></ProtectedPage>} />
+              {/* Protected routes */}
+              <Route path="/" element={<ProtectedPage><Dashboard /></ProtectedPage>} />
+              <Route path="/agenda" element={<ProtectedPage><Agenda /></ProtectedPage>} />
+              <Route path="/clientes" element={<ProtectedPage><Clientes /></ProtectedPage>} />
+              <Route path="/orcamentos" element={<ProtectedPage><Orcamentos /></ProtectedPage>} />
+              <Route path="/produtos" element={<ProtectedPage><Produtos /></ProtectedPage>} />
+              <Route path="/calculadora" element={<ProtectedPage><Calculadora /></ProtectedPage>} />
+              <Route path="/relatorios" element={<ProtectedPage><Relatorios /></ProtectedPage>} />
+              <Route path="/configuracoes" element={<ProtectedPage><Configuracoes /></ProtectedPage>} />
+              <Route path="/execucao" element={<ProtectedPage><Execucao /></ProtectedPage>} />
+              <Route path="/checkout" element={<ProtectedPage><Checkout /></ProtectedPage>} />
+              <Route path="/painel" element={<ProtectedPage><Painel /></ProtectedPage>} />
+              <Route path="/equipamentos" element={<ProtectedPage><Equipamentos /></ProtectedPage>} />
+              <Route path="/marketplace" element={<ProtectedPage><Marketplace /></ProtectedPage>} />
+              <Route path="/deslocamentos" element={<ProtectedPage><Deslocamentos /></ProtectedPage>} />
+              <Route path="/x9k2m" element={<ProtectedPage><PainelAdmin /></ProtectedPage>} />
+              <Route path="/painel-admin" element={<ProtectedPage><PainelAdmin /></ProtectedPage>} />
 
-                {/* Fallback */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+              {/* Fallback */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
           </AuthProvider>
         </TechnicianProvider>
       </BrowserRouter>
