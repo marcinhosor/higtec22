@@ -35,15 +35,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
         if (session?.user) {
           // Use setTimeout to avoid Supabase auth deadlock
-          setTimeout(async () => {
-            const { data } = await supabase
-              .from("profiles")
-              .select("company_id")
-              .eq("user_id", session.user.id)
-              .maybeSingle();
-            setCompanyId(data?.company_id ?? null);
-            setLoading(false);
-          }, 0);
+          const { data } = await supabase
+            .from("profiles")
+            .select("company_id")
+            .eq("user_id", session.user.id)
+            .maybeSingle();
+          setCompanyId(data?.company_id ?? null);
+          setLoading(false);
         } else {
           setCompanyId(null);
           setLoading(false);

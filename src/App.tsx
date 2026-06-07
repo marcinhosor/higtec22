@@ -34,10 +34,10 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 const queryClient = new QueryClient();
 
 const Loading = () => (
-  <div className="min-h-screen flex items-center justify-center bg-slate-50">
+  <div className="min-h-screen flex items-center justify-center bg-background">
     <div className="text-center">
-      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto" />
-      <p className="text-sm text-slate-500 mt-3">Carregando...</p>
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
+      <p className="text-sm text-muted-foreground mt-3">Carregando...</p>
     </div>
   </div>
 );
