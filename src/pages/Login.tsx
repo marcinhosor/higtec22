@@ -77,12 +77,19 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4">
-      <Card className="w-full max-w-md shadow-card">
-        <CardHeader className="text-center space-y-3">
-          <img src={logoApp} alt="Logo" className="h-16 mx-auto" />
-          <CardTitle>Entrar</CardTitle>
-          <CardDescription>Acesse sua conta para continuar</CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4 py-8">
+      <Card className="w-full max-w-md shadow-2xl border-none rounded-[2rem] overflow-hidden">
+        <div className="bg-[#004A8D] py-8 text-center text-white relative">
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-10">
+            <div className="absolute top-0 left-0 w-32 h-32 bg-white rounded-full -translate-x-1/2 -translate-y-1/2 blur-2xl"></div>
+          </div>
+          <img src={logoApp} alt="Logo" className="h-20 mx-auto relative z-10 brightness-0 invert" />
+          <h2 className="text-2xl font-black mt-4 tracking-tight uppercase relative z-10">HigTec</h2>
+          <p className="text-blue-100 text-xs font-bold uppercase tracking-widest relative z-10">Gestão Profissional</p>
+        </div>
+        <CardHeader className="text-center space-y-1 pt-8">
+          <CardTitle className="text-2xl font-black text-slate-800 uppercase tracking-tighter">Entrar</CardTitle>
+          <CardDescription className="font-medium text-slate-400">Acesse sua conta para continuar</CardDescription>
         </CardHeader>
 
         <Tabs defaultValue="admin" className="w-full">
