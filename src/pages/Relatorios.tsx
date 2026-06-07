@@ -185,7 +185,7 @@ const Relatorios = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                       <YAxis tick={{ fontSize: 10 }} />
-                      <Tooltip formatter={(v: number) => currency(v)} />
+                      <Tooltip formatter={(v: any) => currency(Number(v))} />
                       <Bar dataKey="valor" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                     </BarChart>
                   </ResponsiveContainer>
@@ -345,7 +345,7 @@ const Relatorios = () => {
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="name" tick={{ fontSize: 10 }} />
                               <YAxis tick={{ fontSize: 10 }} />
-                              <Tooltip formatter={(v: number) => `${v} ml`} />
+                              <Tooltip formatter={(v: any) => `${v} ml`} />
                               <Bar dataKey="ml" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
                             </BarChart>
                           </ResponsiveContainer>
